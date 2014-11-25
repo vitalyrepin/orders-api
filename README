@@ -1,0 +1,7 @@
+Simple NoSQL order management system.
+
+API is described in the file orders.thrift
+
+To produce API documentation and SDKs for variety of languages issue the command: "make all". See Makefile for the details of the targets.
+
+About thrift: https://thrift.apache.org/

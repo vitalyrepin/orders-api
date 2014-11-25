@@ -63,6 +63,7 @@ class PrintAndDeliveryHandler:
 handler = PrintAndDeliveryHandler()
 processor = PrintAndDelivery.Processor(handler)
 #transport = TSSLSocket.TSSLServerSocket('localhost', 30303)
+# We listen to localhost only!!! SSL service is a public one. Provided with the help of stunnel
 transport = TSocket.TServerSocket('localhost', 30303)
 tfactory = TTransport.TBufferedTransportFactory()
 pfactory = TBinaryProtocol.TBinaryProtocolFactory()

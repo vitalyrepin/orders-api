@@ -16,7 +16,9 @@ from thrift.protocol import TBinaryProtocol
 
 try:
   # Make socket
-  transport = TSSLSocket.TSSLSocket('localhost', 30301, True, 'client.crt')
+  transport = TSSLSocket.TSSLSocket('devel.vrepin.org', 30301, True, 'cacert.pem')
+
+#  transport = TSocket.TSocket('devel.vrepin.org', 30303)
 
   # Buffering is critical. Raw sockets are very slow
   transport = TTransport.TBufferedTransport(transport)
@@ -39,7 +41,7 @@ try:
   print 'authToken = ' + authToken
 
   # Testing error case: no such user
-  try: 
+  try:
     authToken = client.getAuthToken("tstAuthError", "superlosenord")
     print 'authToken = ' + authToken
   except AccessDenied as err:
