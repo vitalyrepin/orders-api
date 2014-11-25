@@ -5,3 +5,8 @@ API is described in the file orders.thrift
 To produce API documentation and SDKs for variety of languages issue the command: "make all". See Makefile for the details of the targets.
 
 About thrift: https://thrift.apache.org/
+
+Server code is located in the Server sub-folder. SSL protection: using stunnel.
+
+Client example (in python): look at the ClientExample sub-folder.
+
