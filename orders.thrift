@@ -9,7 +9,7 @@ struct Person {
 	4: optional string Title
 }
 
-// Delivery address
+// Delivery address. Only ISO/IEC 8859-15 characters are allowed
 struct Address {
 	1: Person To,
 	2: string City,
@@ -21,11 +21,28 @@ struct Address {
 	7: string cc
 }
 
+// Possible delivery modes
+enum DeliveryMode {
+	// Economy-class delivery
+	ECONOMY = 1,
+	// Courier delivery: UPS carrier service
+	COURIER_UPS = 2
+}
+
+// Possible packaging modes
+enum PackagingMode {
+	// Envelope
+	ENVELOPE = 1,
+	// Box
+	BOX = 2
+}
+
 // Possible status of the printing orders
 enum PrintOrderStatus {
-	PROCESSING = 1,
-	PRINTED = 2,
-	SHIPPED = 3
+        RECEIVED = 1
+	PROCESSING = 2,
+	PRINTED = 3,
+	SHIPPED = 4
 }
 
 // Possible error codes for order-related errors
@@ -36,6 +53,34 @@ enum PrintOrderErrCode {
 	INVALID_ADDRESS = 2,
 	// Service can't download the file to print using the URL given
 	INVALID_PRINT_URL = 3
+}
+
+// Shipment details for the order
+struct ShipmentData {
+	// Delivery address
+	1: Address address,
+	// Delivery class
+	2: DeliveryMode delivery_mode,
+	// Packaging selection
+	3: PackagingMode packaging_mode
+}
+
+// Details of the product to be ordered
+// Products codes are published at our web site
+struct ProductData {
+	1: string product_code,
+	// Number of the document copies to manufacture
+	2: byte qty
+	// URL to fetch the document to print from
+	3: string url
+}
+
+// Miscellaneous order details to be stored with the order. Optional
+struct OrderMiscDetails {
+	// Internal document id used by Customer
+	1: string doc_id
+	// Any text remark about the order
+	2: string comment
 }
 
 // Order processing errors
@@ -66,6 +111,14 @@ exception AccessDenied {
 service PrintAndDelivery {
 	void ping(),
 	string getAuthToken(1:string username, 2:string pswd) throws(1:AccessDenied adn),
-	string newOrder(1:string authToken, 2:Address Destination, 3:string URL, 4:string comment="") throws (1:PrintOrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr),
+	/**
+	 * Puts new Purchase Order to the system
+	 *
+	 * @param string auth_token  Authentication token returned by getAuthToken method
+	 * @param ShipmentData Shipment data (address, delivery mode, packaging selection)
+	 * @param list<ProductData> product_data Products to be manufactuired (typically this list contains 1 product)
+	 * @param OrderMiscDetails Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
+	*/
+	string newOrder(1:string auth_token, 2:ShipmentData shipment, 3:list<ProductData> product_data, 4:OrderMiscDetails misc) throws (1:PrintOrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr),
 	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string OrderId) throws(1:PrintOrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
 }

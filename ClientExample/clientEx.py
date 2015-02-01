@@ -16,9 +16,9 @@ from thrift.protocol import TBinaryProtocol
 
 try:
   # Make socket
-  transport = TSSLSocket.TSSLSocket('devel.vrepin.org', 30301, True, 'cacert.pem')
+#  transport = TSSLSocket.TSSLSocket('devel.vrepin.org', 30301, True, 'cacert.pem')
 
-#  transport = TSocket.TSocket('devel.vrepin.org', 30303)
+  transport = TSocket.TSocket('localhost', 30303)
 
   # Buffering is critical. Raw sockets are very slow
   transport = TTransport.TBufferedTransport(transport)
@@ -50,33 +50,37 @@ try:
   # Create new order
   person = Person('John', 'Smith', 'W.', 'Dr.')
   addr = Address(person, 'Boston', 'Massachusetts', 'StreetName 15', 'Apt. 25', 12567898, 'US')
-  ordId = client.newOrder(authToken, addr, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf', 'Test')
+  shipment = ShipmentData(addr, DeliveryMode.ECONOMY, PackagingMode.ENVELOPE)
+  product = ProductData('SHAMROCK-VITT-100', 1, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf')
+  misc = OrderMiscDetails('DocIdTest', 'Test comment')
+
+  ordId = client.newOrder(authToken, shipment, [product], misc)
   print 'ordId = "' + ordId + '"'
 
   # Testing error case: Access denied
   try:
-    ordId = client.newOrder('wrongAuthToken', addr, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf', 'Test')
+    ordId = client.newOrder('wrongAuthToken', shipment, [product], misc)
   except AccessDenied as err:
     print 'Error: ' + err._message
 
   # Testing error case: Not supported delivery address
   try:
-    ordId = client.newOrder('wrongAddress', addr, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf', 'Test')
+    ordId = client.newOrder('wrongAddress', shipment, [product], misc)
   except PrintOrderError as err:
     print 'Error: ' + str(err.Code) + ' ' + err._message
 
   # Testing error case: Invalid URL
   try:
-    ordId = client.newOrder('wrongURL', addr, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf', 'Test')
+    ordId = client.newOrder('wrongURL', shipment, [product], misc)
+
   except PrintOrderError as err:
     print 'Error: ' + str(err.Code) + ' ' + err._message
-
+  
   # Testing error case: General error
   try:
-    ordId = client.newOrder('wrongSomething', addr, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf', 'Test')
+    ordId = client.newOrder('wrongSomething', shipment, [product], misc)
   except GeneralError as err:
     print 'Error: ' + str(err.OrderId) + ' ' + err._message
-
 
   # Get order statuses
   orderStatuses = client.getOrderDetails(authToken, ordId)
@@ -88,9 +92,15 @@ try:
   except AccessDenied as err:
     print 'Error: ' + err._message
 
-  # Testing error case: Invalid order id
+  # Testing error case: Invalid order id (misformatted)
   try:
-    ordId = client.getOrderDetails("wrongOrderId", ordId)
+    ordId = client.getOrderDetails(authToken, "1234567")
+  except PrintOrderError as err:
+    print 'Error: ' + str(err.Code) + ' ' + err._message
+
+ # Testing error case: Invalid order id (non-existing)
+  try:
+    ordId = client.getOrderDetails(authToken, "54ce99c6f2ecd5121182d597")
   except PrintOrderError as err:
     print 'Error: ' + str(err.Code) + ' ' + err._message
 
@@ -100,6 +110,15 @@ try:
     ordId = client.getOrderDetails("wrongSomething", ordId)
   except GeneralError as err:
     print 'Error: ' + str(err.OrderId) + ' ' + err._message
+
+
+  # Testing error case: Invalid URL (real)
+  try:
+    product = ProductData('SHAMROCK-VITT-100', 1, 'http://vrepin.org/studies/no-such-url.pdf')
+    ordId = client.newOrder(authToken, shipment, [product], misc)
+  except PrintOrderError as err:
+    print 'Error: ' + str(err.Code) + ' ' + err._message
+  
 
   transport.close()
 
