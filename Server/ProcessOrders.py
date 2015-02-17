@@ -32,6 +32,8 @@ import requests
 import mimetypes
 import socket
 
+import logging
+
 # Validity time of authentication token. In seconds
 AUTH_TOK_VALIDITY_TIME = 30
 
@@ -136,7 +138,7 @@ class PrintAndDeliveryHandler:
     self.grid_fs = gridfs.GridFS(self.db, 'printfiles')
 
   def ping(self):
-    print 'ping()'
+    logging.info('ping()')
 
   def getUserId(self, authToken):
     # Searhing user id record by token
@@ -146,7 +148,7 @@ class PrintAndDeliveryHandler:
       raise AccessDenied('Invalid authentication token')
 
     if not(self.checkIsAuthTokValid(user['token']['tm'])):
-      print "Auth token is expired"
+      logging.info("Auth token is expired")
       raise AccessDenied('Authentication token is expired')
 
     return user['_id']
@@ -163,7 +165,7 @@ class PrintAndDeliveryHandler:
     return token['tok']
 
   def getAuthToken(self, username, pswd):
-    print 'username: "' + username + '"'
+    logging.info('username: "%s"', username)
 
     tokAuth = ''
     try:
@@ -178,10 +180,10 @@ class PrintAndDeliveryHandler:
            tokAuth = user['token']['tok']
            tm = time.time()
            if(not(self.checkIsAuthTokValid(user['token']['tm']))):
-             print "Regenerating Auth token for the user '" + username + "'"
+             logging.info("Regenerating Auth token for the user '%s'", username)
              tokAuth = self.mkNewAuthToken(user['_id'])
         else:
-           print "Generating new Auth token for the user '" + username + "'"
+           logging.info("Generating Auth token for the user '%s'", username)
            tokAuth = self.mkNewAuthToken(user['_id'])
     except PyMongoError as err:
         raise GeneralError('-1', 'Something wrong: ' + str(err))
@@ -189,7 +191,7 @@ class PrintAndDeliveryHandler:
     return tokAuth
 
   def getOrderDetails(self, authToken, orderId):
-    print 'orderId: "' + orderId + '"'
+    logging.info('orderId: "%s"', orderId)
 
     if(authToken == 'wrongAuthToken'):
         raise AccessDenied('Access denied or invalid auth token')
@@ -247,7 +249,7 @@ class PrintAndDeliveryHandler:
               "issuer"   : issuer,
               "status"   : [ pr ]
              }
-    print order
+    logging.info(order)
 
     try:
       self.orders.insert(order)
@@ -256,6 +258,7 @@ class PrintAndDeliveryHandler:
 
     return str(order['_id'])
 
+logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
 handler = PrintAndDeliveryHandler()
 processor = OrderManager.Processor(handler)
@@ -269,6 +272,9 @@ server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
  
 #httpServer = THttpServer.THttpServer(processor, ('localhost', 30303), tfactory, pfactory)
 
-print "Starting python server..."
+logging.info("Starting OrderManagement server...")
+
 server.serve()
-print "done!"
+
+logging.info("Exiting OrderManagement server...")
+
