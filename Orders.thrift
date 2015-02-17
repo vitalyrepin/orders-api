@@ -3,20 +3,20 @@
 
 // Person: Name, Surname, Middle name and (optiona) Title (Mr., Mrs., Dr. etc)
 struct Person {
-	1: string Name,
-	2: string Surname,
-	3: string MiddleName = "",
-	4: optional string Title
+	1: string name,
+	2: string surname,
+	3: string middleName = "",
+	4: optional string title
 }
 
 // Delivery address. Only ISO/IEC 8859-15 characters are allowed
 struct Address {
-	1: Person To,
-	2: string City,
-	3: optional string State = "",
-	4: string AddressLine1,
-	5: string AddressLine2 = ""
-	6: i64 ZIP,
+	1: Person to,
+	2: string city,
+	3: optional string state = "",
+	4: string addressLine1,
+	5: string addressLine2 = ""
+	6: i64 zip,
 	// Country code according to ISO 3166-1 alpha-2
 	7: string cc
 }
@@ -38,15 +38,16 @@ enum PackagingMode {
 }
 
 // Possible status of the printing orders
-enum PrintOrderStatus {
+enum OrderStatus {
         RECEIVED = 1
 	PROCESSING = 2,
-	PRINTED = 3,
-	SHIPPED = 4
+	MANUFACTURED = 3,
+	SHIPPED = 4,
+	COMPLETED = 5
 }
 
 // Possible error codes for order-related errors
-enum PrintOrderErrCode {
+enum OrderErrCode {
 	// Operation on non-existing order is requested
 	INVALID_ID = 1,
 	// Delivery is requested to the destination which is currently not served
@@ -60,15 +61,15 @@ struct ShipmentData {
 	// Delivery address
 	1: Address address,
 	// Delivery class
-	2: DeliveryMode delivery_mode,
+	2: DeliveryMode deliveryMode,
 	// Packaging selection
-	3: PackagingMode packaging_mode
+	3: PackagingMode packagingMode
 }
 
 // Details of the product to be ordered
 // Products codes are published at our web site
 struct ProductData {
-	1: string product_code,
+	1: string productCode,
 	// Number of the document copies to manufacture
 	2: byte qty
 	// URL to fetch the document to print from
@@ -78,14 +79,14 @@ struct ProductData {
 // Miscellaneous order details to be stored with the order. Optional
 struct OrderMiscDetails {
 	// Internal document id used by Customer
-	1: string doc_id
+	1: string docId
 	// Any text remark about the order
 	2: string comment
 }
 
 // Order processing errors
-exception PrintOrderError {
-	1: PrintOrderErrCode Code,
+exception OrderError {
+	1: OrderErrCode code,
 	2: string _message
 }
 
@@ -93,12 +94,12 @@ exception PrintOrderError {
 struct OrderTimePair {
 	// Unix timestamp - number of seconds since UNIX epoch
 	1: i64 tm,
-	2: PrintOrderStatus status
+	2: OrderStatus status
 }
 
 // This exception is used for general run-time errors
 exception GeneralError {
-	1: string OrderId,
+	1: string orderId,
 	2: string _message
 }
 
@@ -107,18 +108,18 @@ exception AccessDenied {
 	1: string _message
 }
 
-// This service is used to manage Print & Delivery orders
-service PrintAndDelivery {
+// This service is used to manage orders
+service OrderManager {
 	void ping(),
 	string getAuthToken(1:string username, 2:string pswd) throws(1:AccessDenied adn),
 	/**
 	 * Puts new Purchase Order to the system
 	 *
-	 * @param string auth_token  Authentication token returned by getAuthToken method
-	 * @param ShipmentData Shipment data (address, delivery mode, packaging selection)
-	 * @param list<ProductData> product_data Products to be manufactuired (typically this list contains 1 product)
+	 * @param string authToken  Authentication token returned by getAuthToken method
+	 * @param ShipmentData Shipment data (address, deliveryMode, packaging selection)
+	 * @param list<ProductData> productData Products to be manufactuired (typically this list contains 1 product)
 	 * @param OrderMiscDetails Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
 	*/
-	string newOrder(1:string auth_token, 2:ShipmentData shipment, 3:list<ProductData> product_data, 4:OrderMiscDetails misc) throws (1:PrintOrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr),
-	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string OrderId) throws(1:PrintOrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
+	string newOrder(1:string authToken, 2:ShipmentData shipment, 3:list<ProductData> productData, 4:OrderMiscDetails misc) throws (1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr),
+	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string OrderId) throws(1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
 }

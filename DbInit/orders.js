@@ -5,7 +5,7 @@ db.users.remove({})
 db.products.remove({})
 db.subscriptions.remove({})
 
-db.users.insert({name: 'test', pswd: 'pswd', subscriptions: []})
+db.users.insert({name: 'cert-orders@example.com', pswd: 'qwerty', subscriptions: []})
 
 /// Populating products collection
 db.products.insert({name: 'MOOSEHEAD-VITT-100', description: '"Moose Head" watermark, white handmade paper'})

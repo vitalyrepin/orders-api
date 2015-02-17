@@ -3,8 +3,13 @@
 import sys
 sys.path.append('../gen-py')
 
-from orders import PrintAndDelivery
-from orders.ttypes import *
+import bcrypt
+import platform
+import string
+import hashlib, time, base64
+
+from Orders import OrderManager
+from Orders.ttypes import *
 
 import gridfs
 import bson
@@ -27,6 +32,9 @@ import requests
 import mimetypes
 import socket
 
+# Validity time of authentication token. In seconds
+AUTH_TOK_VALIDITY_TIME = 30
+
 def encodeOrderTimePair(obj):
    return {"_type": "OrderTimePair", "tm" : obj.tm, "status": obj.status}
 
@@ -35,28 +43,28 @@ def decodeOrderTimePair(doc):
    return OrderTimePair(doc["tm"], doc["status"])
 
 def encodeOrderMiscDetails(obj):
-   return {"_type": "OrderMiscDetails", "doc_id" : obj.doc_id, "comment": obj.comment}
+   return {"_type": "OrderMiscDetails", "docId" : obj.docId, "comment": obj.comment}
 
 def decodeOrderMiscDetails(doc):
    assert doc["_type"] == "OrderMiscDetails"
-   return OrderMiscDetails(doc["doc_id"], doc["comment"])
+   return OrderMiscDetails(doc["docId"], doc["comment"])
 
 def encodeFetchedProductData(obj):
    prod = obj.get_product_data()
-   return {"_type": "ProductDataF", "code" : prod.product_code, "qty": prod.qty, "url" : prod.url, "gridfid" : obj.gridfs_id}
+   return {"_type": "ProductDataF", "code" : prod.productCode, "qty": prod.qty, "url" : prod.url, "gridfid" : obj.gridfs_id}
 
 def decodeFetchedProductData(doc):
    assert doc["_type"] == "ProductDataF"
    return ProductData(doc["code"], doc["qty"], doc["url"])
 
 def encodePerson(obj):
-   return  {"_type": "Person", "name" : obj.Name, "Surname": obj.Surname, "Middle" : obj.MiddleName, "Title" : obj.Title}
+   return  {"_type": "Person", "name" : obj.name, "Surname": obj.surname, "Middle" : obj.middleName, "Title" : obj.title}
 
 def encodeAddress(obj):
-   return {"_type": "Address", "To" : encodePerson(obj.To), "City": obj.City, "State" : obj.State, "Line1": obj.AddressLine1, "Line2": obj.AddressLine2, "ZIP": obj.ZIP, "cc": obj.cc }
+   return {"_type": "Address", "To" : encodePerson(obj.to), "City": obj.city, "State" : obj.state, "Line1": obj.addressLine1, "Line2": obj.addressLine2, "ZIP": obj.zip, "cc": obj.cc }
 
 def encodeShipmentData(obj):
-   return {"_type": "ShipmentData", "addr" : encodeAddress(obj.address), "mode": obj.delivery_mode, "pkg" : obj.packaging_mode}
+   return {"_type": "ShipmentData", "addr" : encodeAddress(obj.address), "mode": obj.deliveryMode, "pkg" : obj.packagingMode}
 
 # TBD!!!!
 def decodeShipmentData(doc):
@@ -111,6 +119,12 @@ class Transform(SONManipulator):
           son[key] = self.transform_outgoing(value, collection)
     return son
 
+def makeSessionId(st):
+    m = hashlib.md5()
+    m.update(str(time.time()))
+    m.update(str(st))
+    return string.replace(base64.encodestring(m.digest())[:-3], '/', '$')
+
 class PrintAndDeliveryHandler:
   def __init__(self):
     self.log = {}
@@ -125,14 +139,54 @@ class PrintAndDeliveryHandler:
     print 'ping()'
 
   def getUserId(self, authToken):
-    return self.users.find_one({}, {})['_id']
+    # Searhing user id record by token
+    # TBD: find_one: theoretically there can be more records because of the collisions with hash
+    user = self.users.find_one({'token.tok' : authToken}, {'_id' : 1, 'token' : 1})
+    if user is None:
+      raise AccessDenied('Invalid authentication token')
+
+    if not(self.checkIsAuthTokValid(user['token']['tm'])):
+      print "Auth token is expired"
+      raise AccessDenied('Authentication token is expired')
+
+    return user['_id']
+
+  def checkIsAuthTokValid(self, toktm):
+     tm =time.time()
+     return (tm - toktm < AUTH_TOK_VALIDITY_TIME)
+
+  def mkNewAuthToken(self, userId):
+    token = {}
+    token['tok'] = makeSessionId(platform.node())
+    token['tm'] = time.time()
+    self.users.update({'_id' : userId}, { '$set' : {'token' : token} })
+    return token['tok']
 
   def getAuthToken(self, username, pswd):
     print 'username: "' + username + '"'
-    if (username == 'tstAuthError'):
-        raise AccessDenied('Not valid user/password combination')
 
-    return '1234'
+    tokAuth = ''
+    try:
+      user = self.users.find_one({'name' : username})
+      if user is None:
+        raise AccessDenied('Invalid username or password')
+      if bcrypt.hashpw(pswd.encode('utf-8'), user['pswd'].encode('utf-8')) != user['pswd'].encode('utf-8'):
+        raise AccessDenied('Invalid username or password')
+      else:
+        # If token exists in the users collection, return it. Otherwise generate, write to the database and return
+        if 'token' in user:
+           tokAuth = user['token']['tok']
+           tm = time.time()
+           if(not(self.checkIsAuthTokValid(user['token']['tm']))):
+             print "Regenerating Auth token for the user '" + username + "'"
+             tokAuth = self.mkNewAuthToken(user['_id'])
+        else:
+           print "Generating new Auth token for the user '" + username + "'"
+           tokAuth = self.mkNewAuthToken(user['_id'])
+    except PyMongoError as err:
+        raise GeneralError('-1', 'Something wrong: ' + str(err))
+
+    return tokAuth
 
   def getOrderDetails(self, authToken, orderId):
     print 'orderId: "' + orderId + '"'
@@ -145,9 +199,9 @@ class PrintAndDeliveryHandler:
     try:
       order = self.orders.find_one({ '_id': ObjectId(orderId), 'issuer': self.getUserId(authToken) }, { 'status' : 1, '_id' : 0 })
       if order is None:
-        raise PrintOrderError(PrintOrderErrCode.INVALID_ID, 'No such order: ' + orderId)
+        raise OrderError(OrderErrCode.INVALID_ID, 'No such order: ' + orderId)
     except bson.errors.InvalidId as err:
-        raise PrintOrderError(PrintOrderErrCode.INVALID_ID, 'Invalid order id format: ' + orderId)
+        raise OrderError(OrderErrCode.INVALID_ID, 'Invalid order id format: ' + orderId)
     except PyMongoError as err:
         raise GeneralError('-1', 'Something wrong: ' + str(err))
 
@@ -161,11 +215,11 @@ class PrintAndDeliveryHandler:
     if(authToken == 'wrongAuthToken'):
         raise AccessDenied('Access denied or invalid auth token')
     if(authToken == 'wrongAddress'):
-        raise PrintOrderError(PrintOrderErrCode.INVALID_ADDRESS, 'We do not deliver mail to Afganistan, sorry')
-    if(authToken == 'wrongURL'):
-        raise PrintOrderError(PrintOrderErrCode.INVALID_PRINT_URL, 'Can not download file from URL: ' + products[0].url)
+        raise OrderError(OrderErrCode.INVALID_ADDRESS, 'We do not deliver mail to Afganistan, sorry')
     if(authToken == 'wrongSomething'):
         raise GeneralError('-1', 'Something went wrong. Mongo is down? Try again later...')
+
+    issuer = self.getUserId(authToken)
 
     # TBD: Checking address - can we deliver to it?
 
@@ -175,7 +229,7 @@ class PrintAndDeliveryHandler:
         if product.url:
             r = requests.get(product.url, stream=True)
             if(r.status_code != 200):
-                raise PrintOrderError(PrintOrderErrCode.INVALID_PRINT_URL, 'HTTP status ' + str(r.status_code) + ': can not download file from URL: ' + products[0].url)
+                raise OrderError(OrderErrCode.INVALID_PRINT_URL, 'HTTP status ' + str(r.status_code) + ': can not download file from URL: ' + products[0].url)
             mime_type = mimetypes.guess_type(product.url)[0]
             fname = urlparse(product.url).path
             try:
@@ -185,12 +239,12 @@ class PrintAndDeliveryHandler:
         else:
             fetched_products.append(FetchedProduct(product, None))
 
-    pr = OrderTimePair(int(time.time()), PrintOrderStatus.RECEIVED)
+    pr = OrderTimePair(int(time.time()), OrderStatus.RECEIVED)
 
     order = { "shipment" : shipment,
               "products" : fetched_products,
               "misc"     : misc,
-              "issuer"   :  self.getUserId(authToken),
+              "issuer"   : issuer,
               "status"   : [ pr ]
              }
     print order
@@ -204,7 +258,7 @@ class PrintAndDeliveryHandler:
 
 
 handler = PrintAndDeliveryHandler()
-processor = PrintAndDelivery.Processor(handler)
+processor = OrderManager.Processor(handler)
 #transport = TSSLSocket.TSSLServerSocket('localhost', 30303)
 # We listen to localhost only!!! SSL service is a public one. Provided with the help of stunnel
 transport = TSocket.TServerSocket('localhost', 30303)

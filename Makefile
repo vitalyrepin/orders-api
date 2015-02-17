@@ -4,7 +4,7 @@ THRIFT = thrift
 RM = rm -rf
 
 # Thrift file (IDL)
-ORD = orders.thrift
+ORD = Orders.thrift
 
 # File with CAs. Needed for verification of server certificate by the client. Downloaded from http://curl.haxx.se/ca/cacert.pem
 CAPEM=ClientExample/cacert.pem
