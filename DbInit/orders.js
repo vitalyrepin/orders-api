@@ -1,4 +1,7 @@
-use orders
+// For production: use Orders
+// For dev: use DevOrders
+
+// use orders
 
 /// WARNING!  We clear users, products and subscriptions collections here. For development purposes. Don't use it on a live installation!
 db.users.remove({})
