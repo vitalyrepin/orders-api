@@ -261,8 +261,6 @@ class PrintAndDeliveryHandler:
 
 
 # Main
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-
 # Default values for database name and listening port number
 dbname = 'OrdersTest'
 port = 30345
@@ -274,7 +272,6 @@ except getopt.GetoptError:
       print sys.argv[0] + ' -d <dbname> -p <port number>'
       sys.exit(2)
 for opt, arg in opts:
-    print "arg ='" + arg + "' opt = '" + opt + "'"
     if opt == '-h':
         print sys.argv[0] + ' -d <dbname> -p <port number>'
         sys.exit()
@@ -282,6 +279,9 @@ for opt, arg in opts:
         port = arg
     elif opt in ("-d", "--dbname"):
         dbname = arg
+
+logging.basicConfig(format='%(asctime)s %(message)s', filename='ordermngmt-' + str(port) +'.log', level=logging.DEBUG)
+
 
 handler = PrintAndDeliveryHandler(dbname)
 processor = OrderManager.Processor(handler)
