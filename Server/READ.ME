@@ -11,3 +11,16 @@ Server setup:
 
 1) Dev server: ./ProcessOrders.py -d DevOrders -p 30303
 2) Production: ./ProcessOrders.py -d Orders -p 30300
+
+stunnel log: /var/log/stunnel
+
+App log: ordermngmnt-<port>.log  (dirty, TBD: change to the proper syslog logging)
+
+dev.metidaprint.com:30301 <- developer sandbox
+
+orders.metidaprint.com:443 <- production
+
+User management: utils.py 
+
+SSL certificates:
+- Comodo  apache+openssl.  CSR length: 4096

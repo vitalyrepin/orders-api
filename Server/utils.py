@@ -9,7 +9,7 @@ from pymongo import MongoClient
 
 
 mongo_conn = MongoClient('localhost', 27017)
-db = mongo_conn.orders
+db = mongo_conn.DevOrders
 users = db.users
 
 def create_user(name, pswd):
