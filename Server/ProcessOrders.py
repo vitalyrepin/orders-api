@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys
+import sys, getopt
 sys.path.append('../gen-py')
 
 import bcrypt
@@ -33,6 +33,7 @@ import mimetypes
 import socket
 
 import logging
+import logging.handlers
 
 # Validity time of authentication token. In seconds
 AUTH_TOK_VALIDITY_TIME = 30
@@ -53,11 +54,11 @@ def decodeOrderMiscDetails(doc):
 
 def encodeFetchedProductData(obj):
    prod = obj.get_product_data()
-   return {"_type": "ProductDataF", "code" : prod.productCode, "qty": prod.qty, "url" : prod.url, "gridfid" : obj.gridfs_id}
+   return {"_type": "ProductDataF", "code" : prod.productCode, "qty": prod.qty, "url" : prod.url, "md5" : prod.md5, "gridfid" : obj.gridfs_id}
 
 def decodeFetchedProductData(doc):
    assert doc["_type"] == "ProductDataF"
-   return ProductData(doc["code"], doc["qty"], doc["url"])
+   return ProductData(doc["code"], doc["qty"], doc["url"], doc["md5"])
 
 def encodePerson(obj):
    return  {"_type": "Person", "name" : obj.name, "Surname": obj.surname, "Middle" : obj.middleName, "Title" : obj.title}
@@ -128,10 +129,10 @@ def makeSessionId(st):
     return string.replace(base64.encodestring(m.digest())[:-3], '/', '$')
 
 class PrintAndDeliveryHandler:
-  def __init__(self):
+  def __init__(self, dbname):
     self.log = {}
     self.mongo_conn = MongoClient('localhost', 27017)
-    self.db = self.mongo_conn.orders
+    self.db = self.mongo_conn[dbname]
     self.db.add_son_manipulator(Transform())
     self.users = self.db.users
     self.orders = self.db.orders
@@ -258,21 +259,43 @@ class PrintAndDeliveryHandler:
 
     return str(order['_id'])
 
+
+# Main
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
 
-handler = PrintAndDeliveryHandler()
+# Default values for database name and listening port number
+dbname = 'OrdersTest'
+port = 30345
+
+# Parsing cmdline
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"hd:p:",["dbname=","port="])
+except getopt.GetoptError:
+      print sys.argv[0] + ' -d <dbname> -p <port number>'
+      sys.exit(2)
+for opt, arg in opts:
+    print "arg ='" + arg + "' opt = '" + opt + "'"
+    if opt == '-h':
+        print sys.argv[0] + ' -d <dbname> -p <port number>'
+        sys.exit()
+    elif opt in ("-p", "--port"):
+        port = arg
+    elif opt in ("-d", "--dbname"):
+        dbname = arg
+
+handler = PrintAndDeliveryHandler(dbname)
 processor = OrderManager.Processor(handler)
 #transport = TSSLSocket.TSSLServerSocket('localhost', 30303)
 # We listen to localhost only!!! SSL service is a public one. Provided with the help of stunnel
-transport = TSocket.TServerSocket('localhost', 30303)
+transport = TSocket.TServerSocket('localhost', port)
 tfactory = TTransport.TBufferedTransportFactory()
 pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
 server = TServer.TThreadedServer(processor, transport, tfactory, pfactory)
- 
+
 #httpServer = THttpServer.THttpServer(processor, ('localhost', 30303), tfactory, pfactory)
 
-logging.info("Starting OrderManagement server...")
+logging.info("Starting OrderManagement server on port %s with database '%s'", port, dbname)
 
 server.serve()
 

@@ -53,7 +53,9 @@ enum OrderErrCode {
 	// Delivery is requested to the destination which is currently not served
 	INVALID_ADDRESS = 2,
 	// Service can't download the file to print using the URL given
-	INVALID_PRINT_URL = 3
+	INVALID_PRINT_URL = 3,
+	// Mismatch of MD5 sum for the downloaded document
+	MD5_SUM_MISMATCH =4
 }
 
 // Shipment details for the order
@@ -74,6 +76,8 @@ struct ProductData {
 	2: byte qty
 	// URL to fetch the document to print from
 	3: string url
+	// MD5 sum of the document content
+	4: string md5
 }
 
 // Miscellaneous order details to be stored with the order. Optional
@@ -120,6 +124,6 @@ service OrderManager {
 	 * @param list<ProductData> productData Products to be manufactuired (typically this list contains 1 product)
 	 * @param OrderMiscDetails Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
 	*/
-	string newOrder(1:string authToken, 2:ShipmentData shipment, 3:list<ProductData> productData, 4:OrderMiscDetails misc) throws (1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr),
+	string newOrder(1:string authToken, 2:ShipmentData shipment, 3:list<ProductData> productData, 4:OrderMiscDetails misc) throws (1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
 	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string OrderId) throws(1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
 }

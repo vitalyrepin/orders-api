@@ -16,7 +16,7 @@ from thrift.protocol import TBinaryProtocol
 
 try:
   # Make socket
-#  transport = TSSLSocket.TSSLSocket('devel.vrepin.org', 30301, True, 'cacert.pem')
+  transport = TSSLSocket.TSSLSocket('dev.metidaprint.com', 30301, True, 'cacert.pem')
 
   transport = TSocket.TSocket('localhost', 30303)
 
@@ -51,7 +51,7 @@ try:
   person = Person('John', 'Smith', 'W.', 'Dr.')
   addr = Address(person, 'Boston', 'Massachusetts', 'StreetName 15', 'Apt. 25', 12567898, 'US')
   shipment = ShipmentData(addr, DeliveryMode.ECONOMY, PackagingMode.ENVELOPE)
-  product = ProductData('SHAMROCK-VITT-100', 1, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf')
+  product = ProductData('SHAMROCK-VITT-100', 1, 'http://vrepin.org/studies/Gamification2014/CourseraGamification2014.pdf', '593e00fe36e3f82a8c6859027673f671')
   misc = OrderMiscDetails('DocIdTest', 'Test comment')
 
   ordId = client.newOrder(authToken, shipment, [product], misc)
