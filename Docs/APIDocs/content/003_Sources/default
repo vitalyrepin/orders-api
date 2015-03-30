@@ -1,0 +1,25 @@
+page_format=txt2tags
+page_template=template
+
+page_title=Metida Order Management: Sources
+page_description=Metida Order Management: Sources
+page_header1= Metida Order Management
+page_header2=Sources
+page_keywords=mongo,thrift,php,js,android,sdk,cocoa,ruby,python,javascript
+
+<<<<< content section 1 >>>>>
+
+== Components ==
+
+The following components are used:
+
+- MongoDB is used as a database: http://www.mongodb.org/
+- Apache Thrift is used as a framework for service development  https://thrift.apache.org/Thrift
+
+
+Server-side logic is implemented in Python.
+
+
+== Sources ==
+
+Metida Order Management system is fully open-sourced. Github pages: https://github.com/vitalyrepin/OrderMgmt You can generate your own client SDK from Thrift sources if you need.

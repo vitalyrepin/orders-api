@@ -1,0 +1,97 @@
+page_format=html
+page_template=template
+
+page_title=Metida Print: developer resources
+page_description=Documentation for the developers
+page_header1=Metida Order Management API
+page_header2=Developer resources
+page_keywords=thrift,php,js,android,sdk,cocoa,ruby,python,javascript
+
+<<<<< content section 1 >>>>>
+
+<h2> Order Management API: Introduction </h2>
+
+Metida Print Order Management API allows you to place orders to the system and query the statuses of existing orders.
+
+It allows Metida Print services to be integrated to your platform easy and smoothly.
+
+We provide SDKs for the most popular programming languages:
+
+<h3>How to start</h3>
+
+ <dl>
+  <dt>Step 1</dt>
+  <dd><a href="sdk_downloads/index.html">Get SDK for the service</a></dd>
+  <dt>Step 2</dt>
+  <dd><a href="mailto:api@metidaprint.com?subject=Requesting credentials to Metida sandbox">Get  your test user credentials for the developer sandbox</a>. This step is optional (you can use the public user <em>test@metidaprint.com</em> with password <em>MetisZeus1450BC</em>) but highly recommendable:
+  <ul style="list-style-type:circle">
+    <li> Public user data is cleared on a nightly basis (around midnight in <a href="http://en.wikipedia.org/wiki/Espoo">Esbo, Finland</a>)</li>
+    <li> It's easier for us to assist you with any inquires you might have if you use dedicated credentials</li>
+    </ul></dd>
+  <dt>Step 3</dt>
+  <dd>Develop and test your application in the developer sandbox (dev.metidaprint.com:443) with test credentials</dd>
+  <dt>Step 4</dt>
+  <dd><a href="mailto:api@metidaprint.com?subject=Requesting credentials to Metida Order Management system">Get your Metida Credentials</a></dd>
+  <dt>Step 5</dt>
+  <dd>Switch your application to use Metida Services (orders.metidaprint.com:443)!</dd>
+</dl>
+
+<h3>Metida Order Management API: how to start?</h3>
+
+The ultimate API design goal for us is simpicity. We made Order Management API as simple as we could.
+
+
+Judge yourself:
+
+<ol type="1">
+  <li>Authorize against the service using the method <a href="APIref/Orders.html#Fn_OrderManager_getAuthToken">getAuthToken</a></li>
+  <li>Fill the order details using the structures <a href="APIref/Orders.html#Struct_ProductData">ProductData</a>, <a href="APIref/Orders.html#Struct_ShipmentData">ShipmentData</a> and
+  <a href="APIref/Orders.html#Struct_OrderMiscDetails">OrderMiscDetails</a></li>
+  <li>Place your order by calling the method <a href="APIref/Orders.html#Fn_OrderManager_newOrder">newOrder</a></li>
+</ol> 
+
+
+As simple as that! 
+
+
+<h3>Developer SDK</h3>
+
+<table>
+  <tr>
+    <td>Python</td>
+    <td><a href="sdk/python-sdk.tar.gz">Install SDK</a></td>
+  </tr>
+  <tr>
+    <td>JavaScript</td>
+    <td><a href="sdk/js-sdk.tar.gz">Install SDK</a></td>
+  </tr>
+<tr>
+<td>Android</td> <td><a href="sdk/android-sdk.tar.gz">Install SDK</a></td>
+</tr>
+<tr>
+<td>Java</td> <td><a href="sdk/java-sdk.tar.gz">Install SDK</a></td>
+</tr>
+<tr>
+<td>Cocoa</td> <td><a href="sdk/cocoa-sdk.tar.gz">Install SDK</a></td>
+</tr>
+<tr>
+<td>C#</td> <td><a href="sdk/csharp-sdk.tar.gz">Install SDK</a></td>
+</tr>
+<tr>
+<td>PHP</td> <td><a href="sdk/php-sdk.tar.gz">Install SDK</a></td>
+</tr>
+<tr>
+<td>Perl</td> <td><a href="sdk/perl-sdk.tar.gz">Install SDK</a></td>
+</tr>
+<tr>
+<td>Ruby</td> <td><a href="sdk/ruby-sdk.tar.gz">Install SDK</a></td>
+</tr>
+</table>
+
+<h3>API reference</h3>
+
+<p>API reference is available at the <a href="APIref/index.html">API Reference pages</a>  If you have any issues with SDKs - contact us at <a href="mailto:api@metidaprint.com">api@metidaprint.com</a>! 
+
+</p>
+
+

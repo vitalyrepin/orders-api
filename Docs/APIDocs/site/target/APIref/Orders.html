@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link href="style.css" rel="stylesheet" type="text/css"/>
+<title>Thrift module: Orders</title></head><body>
+<div class="container-fluid">
+<h1>Thrift module: Orders</h1>
+<table class="table-bordered table-striped table-condensed"><thead><th>Module</th><th>Services</th><th>Data types</th><th>Constants</th></thead>
+<tr>
+<td>Orders</td><td><a href="Orders.html#Svc_OrderManager">OrderManager</a><br/>
+<ul>
+<li><a href="Orders.html#Fn_OrderManager_getAuthToken">getAuthToken</a></li>
+<li><a href="Orders.html#Fn_OrderManager_getOrderDetails">getOrderDetails</a></li>
+<li><a href="Orders.html#Fn_OrderManager_newOrder">newOrder</a></li>
+<li><a href="Orders.html#Fn_OrderManager_ping">ping</a></li>
+</ul>
+</td>
+<td><a href="Orders.html#Struct_AccessDenied">AccessDenied</a><br/>
+<a href="Orders.html#Struct_Address">Address</a><br/>
+<a href="Orders.html#Enum_DeliveryMode">DeliveryMode</a><br/>
+<a href="Orders.html#Struct_GeneralError">GeneralError</a><br/>
+<a href="Orders.html#Enum_OrderErrCode">OrderErrCode</a><br/>
+<a href="Orders.html#Struct_OrderError">OrderError</a><br/>
+<a href="Orders.html#Struct_OrderMiscDetails">OrderMiscDetails</a><br/>
+<a href="Orders.html#Enum_OrderStatus">OrderStatus</a><br/>
+<a href="Orders.html#Struct_OrderTimePair">OrderTimePair</a><br/>
+<a href="Orders.html#Enum_PackagingMode">PackagingMode</a><br/>
+<a href="Orders.html#Struct_Person">Person</a><br/>
+<a href="Orders.html#Struct_ProductData">ProductData</a><br/>
+<a href="Orders.html#Struct_ShipmentData">ShipmentData</a><br/>
+</td>
+<td></code></td>
+</tr></table>
+<hr/><h2 id="Enumerations">Enumerations</h2>
+<div class="definition"><h3 id="Enum_DeliveryMode">Enumeration: DeliveryMode</h3>
+Possible delivery modes
+<p/>
+<dl>
+<dt>ECONOMY</dt> <dd>Economy-class delivery</dd>
+<dt>COURIER_UPS</dt> <dd> Courier delivery: UPS carrier service </dd>
+</dl>
+<br/><br/><table class="table-bordered table-striped table-condensed">
+<tr><td><code>ECONOMY</code></td><td><code>1</code></td></tr>
+<tr><td><code>COURIER_UPS</code></td><td><code>2</code></td></tr>
+</table></div>
+<div class="definition"><h3 id="Enum_PackagingMode">Enumeration: PackagingMode</h3>
+Possible packaging modes
+<p/>
+<dl>
+<dt>ENVELOPE</dt> <dd>Envelop</dd>
+<dt>BOX</dt> <dd>Box</dd>
+</dl>
+<br/><br/><table class="table-bordered table-striped table-condensed">
+<tr><td><code>ENVELOPE</code></td><td><code>1</code></td></tr>
+<tr><td><code>BOX</code></td><td><code>2</code></td></tr>
+</table></div>
+<div class="definition"><h3 id="Enum_OrderStatus">Enumeration: OrderStatus</h3>
+Possible status of the printing orders
+<dl>
+<dt>RECEIVED</dt> <dd>The order has been received</dd>
+<dt>PROCESSING</dt> <dd>The order is currently being processed by the stuff</dd>
+<dt>MANUFACTURED</dt> <dd>The order has been manufactured</dd>
+<dt>SHIPPED</dt> <dd>The order has been shipped</dd>
+<dt>COMPLETED</dt> <dd> The order is completed</dd>
+</dl>
+<br/><br/><table class="table-bordered table-striped table-condensed">
+<tr><td><code>RECEIVED</code></td><td><code>1</code></td></tr>
+<tr><td><code>PROCESSING</code></td><td><code>2</code></td></tr>
+<tr><td><code>MANUFACTURED</code></td><td><code>3</code></td></tr>
+<tr><td><code>SHIPPED</code></td><td><code>4</code></td></tr>
+<tr><td><code>COMPLETED</code></td><td><code>5</code></td></tr>
+</table></div>
+<div class="definition"><h3 id="Enum_OrderErrCode">Enumeration: OrderErrCode</h3>
+Possible error codes for order-related errors
+<p/>
+<dl>
+<dt>INVALID_ID</dt> <dd> Operation on non-existing order is requested </dt>
+<dt>INVALID_ADDRESS</dt> <dd> Delivery is requested to the destination which is currently not served </dd>
+<dt>INVALID_PRINT_URL</dt> <dd> Service can't download the file to print using the URL given</dd>
+<dt>MD5_SUM_MISMATCH</dt> </dd> Mismatch of MD5 sum for the downloaded document </dd>
+</dl>
+<br/><br/><table class="table-bordered table-striped table-condensed">
+<tr><td><code>INVALID_ID</code></td><td><code>1</code></td></tr>
+<tr><td><code>INVALID_ADDRESS</code></td><td><code>2</code></td></tr>
+<tr><td><code>INVALID_PRINT_URL</code></td><td><code>3</code></td></tr>
+<tr><td><code>MD5_SUM_MISMATCH</code></td><td><code>4</code></td></tr>
+</table></div>
+<hr/><h2 id="Structs">Data structures</h2>
+<div class="definition"><h3 id="Struct_Person">Struct: Person</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>name</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>surname</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>3</td><td>middleName</td><td><code>string</code></td><td></td><td>default</td><td>""</td></tr>
+<tr><td>4</td><td>title</td><td><code>string</code></td><td></td><td>optional</td><td></td></tr>
+</table><br/>Person: Name, Surname, Middle name and (optiona) Title (Mr., Mrs., Dr. etc)
+<br/></div><div class="definition"><h3 id="Struct_Address">Struct: Address</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>to</td><td><code><a href="Orders.html#Struct_Person">Person</a></code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>city</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>3</td><td>state</td><td><code>string</code></td><td></td><td>optional</td><td>""</td></tr>
+<tr><td>4</td><td>addressLine1</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>5</td><td>addressLine2</td><td><code>string</code></td><td></td><td>default</td><td>""</td></tr>
+<tr><td>6</td><td>zip</td><td><code>i64</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>7</td><td>cc</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</table><br/>Delivery address. Only ISO/IEC 8859-15 characters are allowed
+<dl>
+<dt>cc</dt> <dd>Country code according to ISO 3166-1 alpha-2</dd>
+</dl>
+<br/></div><div class="definition"><h3 id="Struct_ShipmentData">Struct: ShipmentData</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>address</td><td><code><a href="Orders.html#Struct_Address">Address</a></code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>deliveryMode</td><td><code><a href="Orders.html#Enum_DeliveryMode">DeliveryMode</a></code></td><td></td><td>default</td><td></td></tr>
+<tr><td>3</td><td>packagingMode</td><td><code><a href="Orders.html#Enum_PackagingMode">PackagingMode</a></code></td><td></td><td>default</td><td></td></tr>
+</table><br/>Shipment details for the order
+<dl>
+<dt>address</dt> <dd> Delivery address </dd>
+<dt>deliveryMode</dt> <dd>Delivery class (economy, courier)</dd>
+<dt>packagingMode</dt> <dd>Packaging selection</dd>
+</dl>
+<br/></div><div class="definition"><h3 id="Struct_ProductData">Struct: ProductData</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>productCode</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>qty</td><td><code>byte</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>3</td><td>url</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>4</td><td>md5</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</table><br/>Details of the product to be ordered. Products codes are published at our web site.
+<dl>
+<dt>productCode</dt> <dd>Product code from the product catalog</dd>
+<dt>qty</dt> <dd> Number of the product copies to manufacture</dd>
+<dt>url</dt> <dd> URL to fetch the document to print from</dd>
+<dt>md5</dt> <dd> MD5 sum of the document located at the URL url</dd>
+</dl>
+<br/></div><div class="definition"><h3 id="Struct_OrderMiscDetails">Struct: OrderMiscDetails</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>docId</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>comment</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</table><br/>Miscellaneous order details to be stored with the order. Optional
+<dl>
+<dt>docId<dt> <dd> Internal document id used by Customer </dd>
+<dt>comment</dt> <dd> Any text remark about the order </dd>
+</dl>
+<br/></div><div class="definition"><h3 id="Struct_OrderTimePair">Struct: OrderTimePair</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>tm</td><td><code>i64</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>status</td><td><code><a href="Orders.html#Enum_OrderStatus">OrderStatus</a></code></td><td></td><td>default</td><td></td></tr>
+</table><br/>OrderStatus / Time pair
+<dl>
+<dt>tm</dt> <dd>Unix timestamp - number of seconds since UNIX epoch</dd>
+</dl>
+<br/></div><div class="definition"><h3 id="Struct_OrderError">Exception: OrderError</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>code</td><td><code><a href="Orders.html#Enum_OrderErrCode">OrderErrCode</a></code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>_message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</table><br/>Order processing errors
+<p/>
+code:	Numerical error code
+<p/>
+_message:	Human-readable error description
+<br/></div><div class="definition"><h3 id="Struct_GeneralError">Exception: GeneralError</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>orderId</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+<tr><td>2</td><td>_message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</table><br/>This exception is used for general run-time errors
+<p/>
+orderId:	Id of the order which caused error
+<p/>
+_message:	Human-readable error description
+<br/></div><div class="definition"><h3 id="Struct_AccessDenied">Exception: AccessDenied</h3>
+<table class="table-bordered table-striped table-condensed"><thead><th>Key</th><th>Field</th><th>Type</th><th>Description</th><th>Requiredness</th><th>Default value</th></thead>
+<tr><td>1</td><td>_message</td><td><code>string</code></td><td></td><td>default</td><td></td></tr>
+</table><br/>Access denied errors
+<p/>
+_message:	Human-readable error description
+<br/></div><hr/><h2 id="Services">Services</h2>
+<h3 id="Svc_OrderManager">Service: OrderManager</h3>
+Service: OrderManager
+<p/>
+<p> This service is used to manage orders </p>
+<br/><div class="definition"><h4 id="Fn_OrderManager_getAuthToken">Function: OrderManager.getAuthToken</h4>
+<pre><code>string</code> getAuthToken(<code>string</code> username,
+                    <code>string</code> pswd)
+    throws <code><a href="Orders.html#Struct_AccessDenied">AccessDenied</a></code>
+</pre>Returns authentication token to be used in all other methods
+<br/></div><div class="definition"><h4 id="Fn_OrderManager_ping">Function: OrderManager.ping</h4>
+<pre><code>void</code> ping(<code>string</code> authToken)
+    throws <code><a href="Orders.html#Struct_AccessDenied">AccessDenied</a></code>
+</pre>Pings the service
+<br/></div><div class="definition"><h4 id="Fn_OrderManager_newOrder">Function: OrderManager.newOrder</h4>
+<pre><code>string</code> newOrder(<code>string</code> authToken,
+                <code><a href="Orders.html#Struct_ShipmentData">ShipmentData</a></code> shipment,
+                <code>list&lt;<code><a href="Orders.html#Struct_ProductData">ProductData</a></code>&gt;</code> productData,
+                <code><a href="Orders.html#Struct_OrderMiscDetails">OrderMiscDetails</a></code> misc)
+    throws <code><a href="Orders.html#Struct_OrderError">OrderError</a></code>, <code><a href="Orders.html#Struct_GeneralError">GeneralError</a></code>, <code><a href="Orders.html#Struct_AccessDenied">AccessDenied</a></code>
+</pre>Puts new Purchase Order to the system. Returns order ID
+<p/>
+@param authToken  Authentication token returned by getAuthToken method
+<p/>
+@param shipment Shipment data (address, deliveryMode, packaging selection)
+<p/>
+@param productData Products to be manufactuired (typically this list contains 1 product)
+<p/>
+@param misc Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
+<br/></div><div class="definition"><h4 id="Fn_OrderManager_getOrderDetails">Function: OrderManager.getOrderDetails</h4>
+<pre><code>list&lt;<code><a href="Orders.html#Struct_OrderTimePair">OrderTimePair</a></code>&gt;</code> getOrderDetails(<code>string</code> authToken,
+                                    <code>string</code> orderId)
+    throws <code><a href="Orders.html#Struct_OrderError">OrderError</a></code>, <code><a href="Orders.html#Struct_GeneralError">GeneralError</a></code>, <code><a href="Orders.html#Struct_AccessDenied">AccessDenied</a></code>
+</pre>* Returns all the details about specific order
+*
+ * @param authToken  Authentication token returned by getAuthToken method
+*
+* @param orderId Id of the order (returned by the method newOrder)
+<br/></div></div></body></html>

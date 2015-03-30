@@ -1,0 +1,239 @@
+/* === Stylesheet created by Txt2Site === */
+body { 
+  background-color: #CCF;
+  font-family: Verdana, Arial, Comic Sans MS;
+  color: #014;
+  font-size: 10pt;
+}
+
+#div_top { 
+  position: relative;
+  width: auto;
+  height: 60px; 
+  margin: 0px; 
+  padding: 0px; 
+  border-left: 10px solid #036;
+  border-top: 10px solid #036;
+  border-right: 10px solid #036;
+  background-color: #CCF;
+}
+
+#div_header { 
+  width: auto;
+  height: 145px;
+  margin: 0;
+  padding: 6px 16px 6px 16px; 
+  border-left: 50px solid #036;
+  border-right: 50px solid #036;
+  background-color: #69C;
+}
+
+#div_header p { 
+  margin: 5px;
+  padding: 0px;
+  text-align: center;
+  color: #036;
+  font-family: Comic Sans MS, Verdana, Arial;
+}
+
+#div_header .header1 { 
+  font-size: 30px;
+}
+
+#div_header .header2 { 
+  font-size: 20px;
+}
+
+#div_main { 
+  width: auto;
+  min-height: 300px;
+  margin: 0; 
+  padding: 6px 16px 6px 16px; 
+  border-left: 10px solid #036;
+  border-right: 10px solid #036;
+  background-color: #CCF;
+}
+
+/* ==== HEADERS ===== */
+h1, h2, h3, h4, h5, h6 {
+  color: #036;
+  font-family: Verdana, Arial, Comic Sans MS;
+}
+
+/* ==== PARAGRAPH ===== */
+p { 
+  color: #014;
+  font-size: 10pt; 
+  line-height: 140%; 
+  text-align: left; 
+  padding: 0px;
+  margin: 0px;
+}
+
+pre {
+  font-family: monospace;
+  border: solid 1px #AAA;
+  border-left: solid 5px #AAA;
+  background-color: #EEE;
+  padding: 1em 1em 1em .2em;
+  overflow: auto;
+  margin-bottom: 1em;
+}
+
+/* ==== TABLE CLASS CLASSIC ===== */
+table.classic {
+  font-size	: 100%;     /* Needed to inherit the body font size*/
+  border-spacing: 0;
+  border: solid 1px #036;
+}
+
+table.classic th {
+  border: solid 1px #036;
+  padding: .5em 0;
+  padding: .5em .5em;
+  background-color: #69C;
+}
+
+table.classic td {
+  border: solid 1px #036;
+  padding: .5em .5em;
+}
+
+/* ----- TABLE CLASS MODERN ------ */
+table.modern {
+  width: 100%;
+  border-width: 0px;
+  border-bottom: solid 3px #036;
+  border-spacing: 0;
+  margin: 1em 3em 1em 0em;
+}
+table.modern th {
+  border-width: 0px;
+  border-bottom: solid 3px #036;
+  text-align: left;
+  vertical-align: center;
+  padding: .4em .4em .4em .4em;
+  background-color: #69C;
+}
+table.modern td {
+  border-width: 0px;
+  text-align: left;
+  font-size: 0.9em;
+  vertical-align: center;
+  padding: .4em .4em .4em .4em;
+}
+
+/* ==== HORIZONTAL MENU ===== */
+#div_hormenu { 
+  position: absolute;
+  bottom: 10px;
+  right: 50px;
+  text-align: right;
+  font-size: 10pt;
+  padding: 0px;
+  border-right: 0;
+}
+
+#div_hormenu li {
+  margin: 5px 5px 5px 5px;
+  background: none;
+}
+
+#div_hormenu, #div_hormenu ul {
+  padding: 0;
+  margin: 0;
+  color: #014;
+  list-style: none;
+}
+
+#div_hormenu ul.level_1 {
+  position: absolute;
+  border: 0px solid #000000;
+  height: auto;
+  width: auto;
+} 
+
+#div_hormenu  li.level_0  ul {
+  display:none;
+}
+
+#div_hormenu li.level_0 {
+  float: left;
+  padding-right: 20px; 
+}
+
+#div_hormenu li.level_1 {
+  list-style: none;
+  display: list-item;
+  width: 100%;
+}
+
+#div_hormenu  a {
+  text-decoration: none;   
+  color: #014;
+  background: none;
+}
+
+#div_hormenu  a.selected {
+  font-weight: bold;
+  color: #014;
+}
+
+#div_hormenu li.level_0:hover ul.level_1 {
+  display: block;
+  background: none;
+}
+
+#div_hormenu a:hover {
+  display: block;
+  background: none;
+  color: #369;
+}
+
+/* == END HORIZONTAL MENU == */
+
+/* ==== BOTTOM ==== */
+#div_link_to_top { 
+  position: relative;
+  height: 30px;
+  border-left: 10px solid #036;
+  border-bottom: 10px solid #036;
+  border-right: 10px solid #036;
+  background-color: #CCF;    /* === same as main === */
+}
+
+#div_footer { 
+  clear: both; 
+  width: auto; 
+  text-align: center; 
+  margin: 0 auto 0 auto; 
+  padding: 0px;
+}
+
+#div_footer a { 
+  text-decoration: none;
+  color: #014;
+}
+
+#div_footer span { 
+  text-align: center; 
+  margin:0px 20px 0px 20px;
+  padding: 0px;
+  color: #014;
+  font-size: 7pt; 
+}
+
+/* ==== TOP OF CONTENT ==== */
+#link_to_top {
+  position: absolute;
+  bottom: 0px;
+  margin: 0px;
+  padding: 0px 5px 0px 5px;
+  left: 50%;
+  font-size: 1.3em;
+  color: #014;
+  font-weight: normal;
+  text-decoration: none;
+  background-color: #69C;
+}
+
