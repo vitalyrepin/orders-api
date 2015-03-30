@@ -8,5 +8,5 @@ About thrift: https://thrift.apache.org/
 
 Server code is located in the Server sub-folder. SSL protection: using stunnel.
 
-Client example (in python): look at the ClientExample sub-folder.
+Client examples: look at the ClientExamples sub-folder.
 
