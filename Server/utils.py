@@ -14,15 +14,16 @@ users = db.users
 
 def create_user(name, pswd):
    print "Creating user: " + name
-   if(not(check_user(name))):
+   if(check_user(name)):
+	print "User '" + name + "' already exists in the database"
+   else:
+
        user = { "name" : name,
                 "pswd" : hash_pass(pswd),
                 "subscriptions": []
               }
        users.insert(user)
        print "User '" + name + "' added to the database"
-   else:
-       print "User '" + name + "' already exists in the database"
 
 def check_user(name):
     user = users.find_one({'name' : name}, {})
