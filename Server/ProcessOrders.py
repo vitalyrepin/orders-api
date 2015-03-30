@@ -138,7 +138,7 @@ class PrintAndDeliveryHandler:
     self.orders = self.db.orders
     self.grid_fs = gridfs.GridFS(self.db, 'printfiles')
 
-  def ping(self):
+  def ping(self, authToken):
     logging.info('ping()')
 
   def getUserId(self, authToken):

@@ -16,9 +16,11 @@ from thrift.protocol import TBinaryProtocol
 
 try:
   # Make socket
-  transport = TSSLSocket.TSSLSocket('dev.metidaprint.com', 30301, True, 'cacert.pem')
+  transport = TSSLSocket.TSSLSocket('dev.metidaprint.com', 443, True, 'cacert.pem')
 
-  transport = TSocket.TSocket('localhost', 30303)
+#  transport = TSSLSocket.TSSLSocket('orders.metidaprint.com', 443, True, 'cacert.pem')
+
+#  transport = TSocket.TSocket('localhost', 30303)
 
   # Buffering is critical. Raw sockets are very slow
   transport = TTransport.TBufferedTransport(transport)
@@ -32,13 +34,13 @@ try:
   # Connect!
   transport.open()
 
-  # Ping
-  client.ping()
-  print "ping()"
-
-  # Get auth token
+   # Get auth token
   authToken = client.getAuthToken("cert-orders@example.com", "qwerty")
   print 'authToken = ' + authToken
+
+  # Ping
+  client.ping(authToken)
+  print "ping()"
 
   # Testing error case: no such user
   try:

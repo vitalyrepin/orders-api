@@ -1,7 +1,9 @@
 # Order management interface
 # Vitaly Repin
 
-// Person: Name, Surname, Middle name and (optiona) Title (Mr., Mrs., Dr. etc)
+/**
+  * Person: Name, Surname, Middle name and (optiona) Title (Mr., Mrs., Dr. etc)
+ */
 struct Person {
 	1: string name,
 	2: string surname,
@@ -9,7 +11,12 @@ struct Person {
 	4: optional string title
 }
 
-// Delivery address. Only ISO/IEC 8859-15 characters are allowed
+/**
+ * Delivery address. Only ISO/IEC 8859-15 characters are allowed
+ * <dl>
+ * <dt>cc</dt> <dd>Country code according to ISO 3166-1 alpha-2</dd>
+ * </dl>
+ */
 struct Address {
 	1: Person to,
 	2: string city,
@@ -17,113 +24,190 @@ struct Address {
 	4: string addressLine1,
 	5: string addressLine2 = ""
 	6: i64 zip,
-	// Country code according to ISO 3166-1 alpha-2
 	7: string cc
 }
 
-// Possible delivery modes
+/**
+ * Possible delivery modes
+ *
+ * <dl>
+ * <dt>ECONOMY</dt> <dd>Economy-class delivery</dd>
+ * <dt>COURIER_UPS</dt> <dd> Courier delivery: UPS carrier service </dd>
+ * </dl>
+ */
 enum DeliveryMode {
-	// Economy-class delivery
 	ECONOMY = 1,
-	// Courier delivery: UPS carrier service
 	COURIER_UPS = 2
 }
 
-// Possible packaging modes
+/**
+ * Possible packaging modes
+ *
+ * <dl>
+ * <dt>ENVELOPE</dt> <dd>Envelop</dd>
+ * <dt>BOX</dt> <dd>Box</dd>
+ * </dl>
+ */
 enum PackagingMode {
-	// Envelope
 	ENVELOPE = 1,
-	// Box
 	BOX = 2
 }
 
-// Possible status of the printing orders
+/**
+ * Possible status of the printing orders
+ * <dl>
+ * <dt>RECEIVED</dt> <dd>The order has been received</dd>
+ * <dt>PAUSED</dt> <dd>The order has been paused (e.g., to clarify something with the customer)</dd>
+ * <dt>PROCESSING</dt> <dd>The order is currently being processed by the stuff</dd>
+ * <dt>MANUFACTURED</dt> <dd>The order has been manufactured</dd>
+ * <dt>SHIPPED</dt> <dd>The order has been shipped</dd>
+ * <dt>COMPLETED</dt> <dd> The order is completed</dd>
+ * </dl>
+ */
 enum OrderStatus {
         RECEIVED = 1
-	PROCESSING = 2,
-	MANUFACTURED = 3,
-	SHIPPED = 4,
-	COMPLETED = 5
+	PAUSED = 2,
+	PROCESSING = 3,
+	MANUFACTURED = 4,
+	SHIPPED = 5,
+	COMPLETED = 6
 }
 
-// Possible error codes for order-related errors
+/**
+ * Possible error codes for order-related errors
+ *
+ * <dl>
+ * <dt>INVALID_ID</dt> <dd> Operation on non-existing order is requested </dt>
+ * <dt>INVALID_ADDRESS</dt> <dd> Delivery is requested to the destination which is currently not served </dd>
+ * <dt>INVALID_PRINT_URL</dt> <dd> Service can't download the file to print using the URL given</dd>
+ * <dt>MD5_SUM_MISMATCH</dt> </dd> Mismatch of MD5 sum for the downloaded document </dd>
+ * </dl>
+ */
 enum OrderErrCode {
-	// Operation on non-existing order is requested
 	INVALID_ID = 1,
-	// Delivery is requested to the destination which is currently not served
 	INVALID_ADDRESS = 2,
-	// Service can't download the file to print using the URL given
 	INVALID_PRINT_URL = 3,
-	// Mismatch of MD5 sum for the downloaded document
 	MD5_SUM_MISMATCH =4
 }
 
-// Shipment details for the order
+/**
+ * Shipment details for the order
+ * <dl>
+ * <dt>address</dt> <dd> Delivery address </dd>
+ * <dt>deliveryMode</dt> <dd>Delivery class (economy, courier)</dd>
+ * <dt>packagingMode</dt> <dd>Packaging selection</dd>
+ * </dl>
+ */
 struct ShipmentData {
-	// Delivery address
 	1: Address address,
-	// Delivery class
 	2: DeliveryMode deliveryMode,
-	// Packaging selection
 	3: PackagingMode packagingMode
 }
 
-// Details of the product to be ordered
-// Products codes are published at our web site
+/**
+ * Details of the product to be ordered. Products codes are published at our web site.
+ * <dl>
+ * <dt>productCode</dt> <dd>Product code from the product catalog</dd>
+ * <dt>qty</dt> <dd> Number of the product copies to manufacture</dd>
+ * <dt>url</dt> <dd> URL to fetch the document to print from</dd>
+ * <dt>md5</dt> <dd> MD5 sum of the document located at the URL url</dd>
+ * </dl>
+ */
 struct ProductData {
 	1: string productCode,
-	// Number of the document copies to manufacture
 	2: byte qty
-	// URL to fetch the document to print from
 	3: string url
-	// MD5 sum of the document content
 	4: string md5
 }
 
-// Miscellaneous order details to be stored with the order. Optional
+/**
+ * Miscellaneous order details to be stored with the order. Optional
+ * <dl>
+ * <dt>docId<dt> <dd> Internal document id used by Customer </dd>
+ * <dt>comment</dt> <dd> Any text remark about the order </dd>
+ * </dl>
+ */
 struct OrderMiscDetails {
-	// Internal document id used by Customer
 	1: string docId
-	// Any text remark about the order
 	2: string comment
 }
 
-// Order processing errors
+/**
+ * OrderStatus / Time pair
+ * <dl>
+ * <dt>tm</dt> <dd>Unix timestamp - number of seconds since UNIX epoch</dd>
+ * </dl>
+ */
+struct OrderTimePair {
+	1: i64 tm,
+	2: OrderStatus status
+}
+
+/**
+ *  Order processing errors
+ *
+ *  code:	Numerical error code
+ *
+ *  _message:	Human-readable error description
+ */
 exception OrderError {
 	1: OrderErrCode code,
 	2: string _message
 }
 
-// OrderStatus / Time pair
-struct OrderTimePair {
-	// Unix timestamp - number of seconds since UNIX epoch
-	1: i64 tm,
-	2: OrderStatus status
-}
-
-// This exception is used for general run-time errors
+/**
+ *  This exception is used for general run-time errors
+ *
+ *  orderId:	Id of the order which caused error
+ *
+ *  _message:	Human-readable error description
+ */
 exception GeneralError {
 	1: string orderId,
 	2: string _message
 }
 
-// Access denied errors
+/**
+ *  Access denied errors
+ *
+ *  _message:	Human-readable error description
+ */
 exception AccessDenied {
 	1: string _message
 }
 
-// This service is used to manage orders
+/**
+ * Service: OrderManager
+ *
+ * <p> This service is used to manage orders </p>
+ */
 service OrderManager {
-	void ping(),
-	string getAuthToken(1:string username, 2:string pswd) throws(1:AccessDenied adn),
 	/**
-	 * Puts new Purchase Order to the system
+	  * Returns authentication token to be used in all other methods
+	  */
+	string getAuthToken(1:string username, 2:string pswd) throws(1:AccessDenied adn)
+	/**
+	  * Pings the service
+	 */
+	void ping(1: string authToken) throws (1:AccessDenied adn)
+	/**
+	 * Puts new Purchase Order to the system. Returns order ID
 	 *
-	 * @param string authToken  Authentication token returned by getAuthToken method
-	 * @param ShipmentData Shipment data (address, deliveryMode, packaging selection)
-	 * @param list<ProductData> productData Products to be manufactuired (typically this list contains 1 product)
-	 * @param OrderMiscDetails Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
-	*/
+	 * @param authToken  Authentication token returned by getAuthToken method
+	 *
+	 * @param shipment Shipment data (address, deliveryMode, packaging selection)
+	 *
+	 * @param productData Products to be manufactuired (typically this list contains 1 product)
+	 *
+	 * @param misc Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
+	 */
 	string newOrder(1:string authToken, 2:ShipmentData shipment, 3:list<ProductData> productData, 4:OrderMiscDetails misc) throws (1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
-	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string OrderId) throws(1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
+	/**
+	 * Returns all the details about specific order
+	 *
+	 * @param authToken  Authentication token returned by getAuthToken method
+	 *
+	 * @param orderId Id of the order (returned by the method newOrder)
+	 */
+	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string orderId) throws(1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
 }
