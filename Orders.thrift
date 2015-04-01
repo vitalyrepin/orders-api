@@ -179,6 +179,15 @@ exception AccessDenied {
 }
 
 /**
+ *  Authentication token is expired. You need to re-request auth token using getAuthToken method
+ *
+ *  _message:	Human-readable error description
+ */
+exception AuthTokenExpired {
+	1: string _message
+}
+
+/**
  * Service: OrderManager
  *
  * <p> This service is used to manage orders </p>
@@ -191,7 +200,7 @@ service OrderManager {
 	/**
 	  * Pings the service
 	 */
-	void ping(1: string authToken) throws (1:AccessDenied adn)
+	void ping(1: string authToken) throws (1:AccessDenied ad_err, 2:AuthTokenExpired at_err)
 	/**
 	 * Puts new Purchase Order to the system. Returns order ID
 	 *
@@ -203,7 +212,7 @@ service OrderManager {
 	 *
 	 * @param misc Miscellaneous details about the order (can be stored with the order and returned by getOrderDetails method
 	 */
-	string newOrder(1:string authToken, 2:ShipmentData shipment, 3:list<ProductData> productData, 4:OrderMiscDetails misc) throws (1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
+	string newOrder(1:string authToken, 2:ShipmentData shipment, 3:list<ProductData> productData, 4:OrderMiscDetails misc) throws (1:OrderError o_err, 2:GeneralError g_err, 3:AccessDenied ad_err, 4:AuthTokenExpired at_err)
 	/**
 	 * Returns all the details about specific order
 	 *
@@ -211,5 +220,5 @@ service OrderManager {
 	 *
 	 * @param orderId Id of the order (returned by the method newOrder)
 	 */
-	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string orderId) throws(1:OrderError oerr, 2:GeneralError gerr, 3:AccessDenied aerr)
+	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string orderId) throws(1:OrderError o_err, 2:GeneralError g_err, 3:AccessDenied ad_err, 4:AuthTokenExpired at_err)
 }

@@ -1,5 +1,6 @@
 PHP Client Example.
 
-Copy Thrift subdirectory to your application tree
+cacert.pem file ( http://curl.haxx.se/docs/caextract.html ) is needed. It can be downloaded from http://curl.haxx.se/ca/cacert.pem
 
-Handle AccessDenied error - it can be thrown because
+Copy Thrift subdirectory to your application tree.
+

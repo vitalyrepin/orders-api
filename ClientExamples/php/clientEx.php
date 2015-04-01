@@ -42,6 +42,7 @@
  use Metida\AccessDenied;
  use Metida\GeneralError;
  use Metida\OrderError;
+ use Metida\AuthTokenExpired;
  use Metida\OrderManagerClient;
  use Metida\Person;
  use Metida\Address;
@@ -54,7 +55,7 @@
  try {
   $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
 
-//  $socket = new TSocket('localhost', 30303);
+  //$socket = new TSocket('localhost', 30303);
   $timeout = 10; // in seconds.
   $socket->setRecvTimeout($timeout*1000);
   $socket->setSendTimeout($timeout*1000);
@@ -182,6 +183,15 @@
     $ordId = $client->newOrder($authToken, $shipment, array($product), $misc);
   } catch(OrderError $err) {
     printf("[OK] Error: %d %s\n", $err->code, $err->_message);
+  }
+
+  // Testing exception: AuthTokenExpired
+  print("Waiting 30 secs...\n");
+  sleep(30);
+  try {
+   $client->ping($authToken);
+  } catch(AuthTokenExpired $err) {
+    printf("[OK] Error: %s\n", $err->_message);
   }
 
  }
