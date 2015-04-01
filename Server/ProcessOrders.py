@@ -139,6 +139,7 @@ class PrintAndDeliveryHandler:
     self.grid_fs = gridfs.GridFS(self.db, 'printfiles')
 
   def ping(self, authToken):
+    self.getUserId(authToken)
     logging.info('ping()')
 
   def getUserId(self, authToken):
@@ -149,8 +150,8 @@ class PrintAndDeliveryHandler:
       raise AccessDenied('Invalid authentication token')
 
     if not(self.checkIsAuthTokValid(user['token']['tm'])):
-      logging.info("Auth token is expired")
-      raise AccessDenied('Authentication token is expired')
+      logging.info("Auth token %s is expired", authToken)
+      raise AuthTokenExpired('Authentication token is expired. Request a new one using getAuthToken')
 
     return user['_id']
 
@@ -189,10 +190,11 @@ class PrintAndDeliveryHandler:
     except PyMongoError as err:
         raise GeneralError('-1', 'Something wrong: ' + str(err))
 
+    logging.info('user "%s" is successfully authorized', username)
     return tokAuth
 
   def getOrderDetails(self, authToken, orderId):
-    logging.info('orderId: "%s"', orderId)
+    logging.info('getOrderDetails for orderId: "%s"', orderId)
 
     if(authToken == 'wrongAuthToken'):
         raise AccessDenied('Access denied or invalid auth token')
