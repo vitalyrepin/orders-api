@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import sys
-sys.path.append('../gen-py')
+sys.path.append('../../gen-py')
 
-from Orders import OrderManager
-from Orders.ttypes import *
-from Orders.constants import *
+from Metida import OrderManager
+from Metida.ttypes import *
+from Metida.constants import *
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -20,7 +20,7 @@ try:
 
 #  transport = TSSLSocket.TSSLSocket('orders.metidaprint.com', 443, True, 'cacert.pem')
 
-#  transport = TSocket.TSocket('localhost', 30303)
+  transport = TSocket.TSocket('localhost', 30303)
 
   # Buffering is critical. Raw sockets are very slow
   transport = TTransport.TBufferedTransport(transport)
@@ -35,7 +35,7 @@ try:
   transport.open()
 
    # Get auth token
-  authToken = client.getAuthToken("cert-orders@example.com", "qwerty")
+  authToken = client.getAuthToken("test@metidaprint.com", "MetisZeus1450BC")
   print 'authToken = ' + authToken
 
   # Ping
@@ -47,7 +47,7 @@ try:
     authToken = client.getAuthToken("NoUser", "")
     print 'authToken = ' + authToken
   except AccessDenied as err:
-    print 'Error: ' + err._message
+    print '[OK] Error: ' + err._message
 
   # Create new order
   person = Person('John', 'Smith', 'W.', 'Dr.')
@@ -63,19 +63,19 @@ try:
   try:
     ordId = client.newOrder('wrongAuthToken', shipment, [product], misc)
   except AccessDenied as err:
-    print 'Error: ' + err._message
+    print '[OK] Error: ' + err._message
 
   # Testing error case: Not supported delivery address
   try:
     ordId = client.newOrder('wrongAddress', shipment, [product], misc)
   except OrderError as err:
-    print 'Error: ' + str(err.code) + ' ' + err._message
+    print '[OK] Error: ' + str(err.code) + ' ' + err._message
 
   # Testing error case: General error
   try:
     ordId = client.newOrder('wrongSomething', shipment, [product], misc)
   except GeneralError as err:
-    print 'Error: ' + str(err.orderId) + ' ' + err._message
+    print '[OK] Error: ' + str(err.orderId) + ' ' + err._message
 
   # Get order statuses
   orderStatuses = client.getOrderDetails(authToken, ordId)
@@ -85,26 +85,26 @@ try:
   try:
     ordId = client.getOrderDetails("wrongAuthToken", ordId)
   except AccessDenied as err:
-    print 'Error: ' + err._message
+    print '[OK] Error: ' + err._message
 
   # Testing error case: Invalid order id (misformatted)
   try:
     ordId = client.getOrderDetails(authToken, "1234567")
   except OrderError as err:
-    print 'Error: ' + str(err.code) + ' ' + err._message
+    print '[OK] Error: ' + str(err.code) + ' ' + err._message
 
- # Testing error case: Invalid order id (non-existing)
+  # Testing error case: Invalid order id (non-existing)
   try:
     ordId = client.getOrderDetails(authToken, "54ce99c6f2ecd5121182d597")
   except OrderError as err:
-    print 'Error: ' + str(err.code) + ' ' + err._message
+    print '[OK] Error: ' + str(err.code) + ' ' + err._message
 
 
   # Testing error case: General error
   try:
     ordId = client.getOrderDetails("wrongSomething", ordId)
   except GeneralError as err:
-    print 'Error: ' + str(err.orderId) + ' ' + err._message
+    print '[OK] Error: ' + str(err.orderId) + ' ' + err._message
 
 
   # Testing error case: Invalid URL (real)
@@ -112,7 +112,7 @@ try:
     product = ProductData('SHAMROCK-VITT-100', 1, 'http://vrepin.org/studies/no-such-url.pdf')
     ordId = client.newOrder(authToken, shipment, [product], misc)
   except OrderError as err:
-    print 'Error: ' + str(err.code) + ' ' + err._message
+    print '[OK] Error: ' + str(err.code) + ' ' + err._message
   
 
   transport.close()

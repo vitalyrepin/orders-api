@@ -33,5 +33,5 @@ def hash_pass(password):
     hash_password = bcrypt.hashpw(password, bcrypt.gensalt())
     return hash_password
 
-create_user('cert-orders@example.com', 'qwerty')
+create_user('test@metidaprint.com', 'MetisZeus1450BC')
 

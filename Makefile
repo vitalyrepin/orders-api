@@ -17,14 +17,16 @@ ORD = Orders.thrift
 THRIFTCMD=-out OrderManager $(ORD)
 
 # File with CAs. Needed for verification of server certificate by the client. Downloaded from http://curl.haxx.se/ca/cacert.pem
-CAPEM=ClientExample/cacert.pem
+CAPEM=ClientExamples/cacert.pem
 
 .PHONY: clean
 
 all: $(CAPEM) html py php js ruby perl csharp cocoa android java
 
 $(CAPEM):
-	cd ClientExample ; wget http://curl.haxx.se/ca/cacert.pem
+	cd ClientExamples ; wget http://curl.haxx.se/ca/cacert.pem
+	cd ClientExamples/py ; ln -s ../cacert.pem cacert.pem
+	cd ClientExamples/php ; ln -s ../cacert.pem cacert.pem
 
 $(LICENSESDK):
 	@echo "Copyright 2015 Metida Print Ab Oy" > $(LICENSESDK)

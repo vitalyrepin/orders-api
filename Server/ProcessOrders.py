@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 import sys, getopt
-sys.path.append('../gen-py')
+sys.path.append('../gen-py/')
 
 import bcrypt
 import platform
 import string
 import hashlib, time, base64
 
-from Orders import OrderManager
-from Orders.ttypes import *
+from Metida import OrderManager
+from Metida.ttypes import *
 
 import gridfs
 import bson

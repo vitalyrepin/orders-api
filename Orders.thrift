@@ -1,6 +1,8 @@
 # Order management interface
 # Vitaly Repin
 
+namespace * Metida
+
 /**
   * Person: Name, Surname, Middle name and (optiona) Title (Mr., Mrs., Dr. etc)
  */
