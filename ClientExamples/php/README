@@ -1,0 +1,5 @@
+PHP Client Example.
+
+Copy Thrift subdirectory to your application tree
+
+Handle AccessDenied error - it can be thrown because
