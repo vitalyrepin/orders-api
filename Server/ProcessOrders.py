@@ -155,6 +155,14 @@ class PrintAndDeliveryHandler:
 
     return user['_id']
 
+  # Used for unit testing: if authToken takes some predefined values the exception is thrown.
+  # Auth token can never take these values in normal calls (if it is returned by getAuthToken method)
+  def checkForUnitTest(self, tok):
+    if(tok == 'wrongAuthToken'):
+        raise AccessDenied('Access denied or invalid auth token')
+    if(tok == 'wrongSomething'):
+        raise GeneralError('-1', 'Something went wrong. Mongo is down? Try again later...')
+
   def checkIsAuthTokValid(self, toktm):
      tm =time.time()
      return (tm - toktm < AUTH_TOK_VALIDITY_TIME)
@@ -193,13 +201,46 @@ class PrintAndDeliveryHandler:
     logging.info('user "%s" is successfully authorized', username)
     return tokAuth
 
+  def getParamMongoName(self, param):
+    param_name = 'UNKNOWN-PARAM-NAME-THIS-IS-SERVER-ERROR'
+    if(param == ProfileParam.CBK_URL):
+      param_name = 'callback_url'
+
+    return param_name
+
+  def getProfileParam(self, authToken, param):
+    self.checkForUnitTest(authToken)
+
+    user = self.getUserId(authToken)
+
+    param_name = self.getParamMongoName(param)
+
+    logging.info('getProfileParam %s for user "%s"', param_name, user)
+
+    value = self.users.find_one({'token.tok' : authToken}, {'_id' : 0, param_name : 1})
+
+    if param_name in value:
+      res = value[param_name]
+    else:
+      res = ""
+
+    return res
+
+  def setProfileParam(self, authToken, param, value):
+    self.checkForUnitTest(authToken)
+
+    user = self.getUserId(authToken)
+    param_name = self.getParamMongoName(param)
+
+    logging.info('setProfileParam for user "%s": %s/"%s"', user, param_name, value)
+
+    self.users.update({'_id' : user}, {'$set' : { param_name : value }})
+
+
   def getOrderDetails(self, authToken, orderId):
     logging.info('getOrderDetails for orderId: "%s"', orderId)
 
-    if(authToken == 'wrongAuthToken'):
-        raise AccessDenied('Access denied or invalid auth token')
-    if(authToken == 'wrongSomething'):
-        raise GeneralError('-1', 'Something went wrong. Mongo is down? Try again later...')
+    self.checkForUnitTest(authToken)
 
     try:
       order = self.orders.find_one({ '_id': ObjectId(orderId), 'issuer': self.getUserId(authToken) }, { 'status' : 1, '_id' : 0 })
@@ -217,12 +258,10 @@ class PrintAndDeliveryHandler:
     return res
 
   def newOrder(self, authToken, shipment, products, misc):
-    if(authToken == 'wrongAuthToken'):
-        raise AccessDenied('Access denied or invalid auth token')
+    self.checkForUnitTest(authToken)
+
     if(authToken == 'wrongAddress'):
         raise OrderError(OrderErrCode.INVALID_ADDRESS, 'We do not deliver mail to Afganistan, sorry')
-    if(authToken == 'wrongSomething'):
-        raise GeneralError('-1', 'Something went wrong. Mongo is down? Try again later...')
 
     issuer = self.getUserId(authToken)
 

@@ -76,6 +76,16 @@ enum OrderStatus {
 }
 
 /**
+ * Possible profile parameters
+ * <dl>
+ * <dt>CBK_URL</dt> <dd>Call back URL to be called when the order status is changed.</dd>
+ * </dl>
+ */
+enum ProfileParam {
+	CBK_URL = 1
+}
+
+/**
  * Possible error codes for order-related errors
  *
  * <dl>
@@ -221,4 +231,22 @@ service OrderManager {
 	 * @param orderId Id of the order (returned by the method newOrder)
 	 */
 	list<OrderTimePair>  getOrderDetails(1:string authToken, 2:string orderId) throws(1:OrderError o_err, 2:GeneralError g_err, 3:AccessDenied ad_err, 4:AuthTokenExpired at_err)
+	/**
+	 * Sets profile parameter
+	 *
+	 * @param authToken  Authentication token returned by getAuthToken method
+         *
+	 * @param param Parameter code
+	 *
+	 * @param value Value of parameter to set
+	 */
+	void setProfileParam(1:string authToken, 2:ProfileParam param, 3:string value) throws(1:AccessDenied ad_err, 2:GeneralError g_err, 3:AuthTokenExpired at_err)
+	/**
+	 * Gets profile parameter. Returns value of the profile parameter (as string).
+	 *
+	 * @param authToken  Authentication token returned by getAuthToken method
+         *
+	 * @param param Parameter code
+	 */
+	string getProfileParam(1:string authToken, 2:ProfileParam param) throws(1:AccessDenied ad_err, 2:GeneralError g_err, 3:AuthTokenExpired at_err)
 }

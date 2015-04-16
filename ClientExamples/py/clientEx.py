@@ -5,9 +5,9 @@
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
- 
+
   http://www.apache.org/licenses/LICENSE-2.0
- 
+
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,11 +33,11 @@ from thrift.protocol import TBinaryProtocol
 
 try:
   # Make socket
-  transport = TSSLSocket.TSSLSocket('dev.metidaprint.com', 443, True, 'cacert.pem')
+#  transport = TSSLSocket.TSSLSocket('dev.metidaprint.com', 443, True, 'cacert.pem')
 
 #  transport = TSSLSocket.TSSLSocket('orders.metidaprint.com', 443, True, 'cacert.pem')
 
-#  transport = TSocket.TSocket('localhost', 30303)
+  transport = TSocket.TSocket('localhost', 30303)
 
   # Buffering is critical. Raw sockets are very slow
   transport = TTransport.TBufferedTransport(transport)
@@ -66,6 +66,46 @@ try:
   except AccessDenied as err:
     print '[OK] Error: ' + err._message
 
+  '''
+  *********************************** get and set Profile Parameters ***********************************
+  '''
+
+  # Testing error case: Access denied
+  try:
+    client.setProfileParam('wrongAuthToken', ProfileParam.CBK_URL, '')
+  except AccessDenied as err:
+    print '[OK] Error: ' + err._message
+
+  try:
+    r = client.getProfileParam('wrongAuthToken', ProfileParam.CBK_URL)
+  except AccessDenied as err:
+    print '[OK] Error: ' + err._message
+
+  # Testing error case: General error
+  try:
+    client.setProfileParam('wrongSomething', ProfileParam.CBK_URL, '')
+  except GeneralError as err:
+    print '[OK] Error: ' + err._message
+
+  try:
+    r = client.getProfileParam('wrongSomething', ProfileParam.CBK_URL)
+  except GeneralError as err:
+    print '[OK] Error: ' + err._message
+
+  # Setting CBK_URL. You can monitor the calls to this callback URL via httpd logs
+  cbk_url = 'http://localhost/orderstatuschanged'
+  client.setProfileParam(authToken, ProfileParam.CBK_URL, cbk_url)
+  res = client.getProfileParam(authToken, ProfileParam.CBK_URL)
+
+  if (res == cbk_url):
+    print "[OK] Setting/getting callback url was successfull"
+  else:
+    print "[NOK] returned callback url: '" + res + "'"
+
+  '''
+  *********************************** newOrder **********************************************************
+  '''
+
   # Create new order
   person = Person('John', 'Smith', 'W.', 'Dr.')
   addr = Address(person, 'Boston', 'Massachusetts', 'StreetName 15', 'Apt. 25', 12567898, 'US')
@@ -93,6 +133,10 @@ try:
     ordId = client.newOrder('wrongSomething', shipment, [product], misc)
   except GeneralError as err:
     print '[OK] Error: ' + str(err.orderId) + ' ' + err._message
+
+  '''
+  *********************************** getOrderDetails *******************************************************
+  '''
 
   # Get order statuses
   orderStatuses = client.getOrderDetails(authToken, ordId)
@@ -130,7 +174,7 @@ try:
     ordId = client.newOrder(authToken, shipment, [product], misc)
   except OrderError as err:
     print '[OK] Error: ' + str(err.code) + ' ' + err._message
- 
+
   # Testing error case: AuthTokenExpired
   print 'Sleeping for 30 seconds...';
   time.sleep(30)

@@ -51,11 +51,12 @@
  use Metida\OrderMiscDetails;
  use Metida\DeliveryMode;
  use Metida\PackagingMode;
+ use Metida\ProfileParam;
 
  try {
-  $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
+//  $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
 
-  //$socket = new TSocket('localhost', 30303);
+  $socket = new TSocket('localhost', 30303);
   $timeout = 10; // in seconds.
   $socket->setRecvTimeout($timeout*1000);
   $socket->setSendTimeout($timeout*1000);
@@ -114,6 +115,45 @@
 
   $misc = new OrderMiscDetails(array('docId' => 'DocIdTest',
   				     'comment' => 'Test comment'));
+
+  /*********************************** get and set Profile Parameters ************************************/
+
+  // Testing error case: Access denied
+  try {
+    $res = $client->getProfileParam('wrongAuthToken', ProfileParam::CBK_URL);
+  } catch (AccessDenied $err) {
+    printf("[OK] Error: %s\n", $err->_message);
+  }
+
+  try {
+    $client->setProfileParam('wrongAuthToken', ProfileParam::CBK_URL, '');
+  } catch (AccessDenied $err) {
+    printf("[OK] Error: %s\n", $err->_message);
+  }
+
+  // Testing error case: General error
+  try {
+    $res = $client->getProfileParam('wrongSomething', ProfileParam::CBK_URL);
+  } catch (GeneralError $err) {
+    printf("[OK] Error: %s %s\n", $err->orderId, $err->_message);
+  }
+
+  try {
+    $client->setProfileParam('wrongSomething', ProfileParam::CBK_URL, '');
+  } catch (GeneralError $err) {
+    printf("[OK] Error: %s %s\n", $err->orderId, $err->_message);
+  }
+
+  // Setting CBK_URL. You can monitor the calls to this callback URL via httpd logs
+  $cbk_url = 'http://localhost/orderstatuschanged.php';
+  $client->setProfileParam($authToken, ProfileParam::CBK_URL, $cbk_url);
+  $res = $client->getProfileParam($authToken, ProfileParam::CBK_URL);
+
+  if ($res == $cbk_url) {
+    printf("[OK] Setting/getting callback url was successfull\n");
+  } else {
+    printf("[NOK] returned callback url: '%s'\n", res);
+  }
 
   /*********************************** newOrder **********************************************************/
 
