@@ -156,7 +156,7 @@ def call_cbks():
             r = requests.post(cbk, data = json.dumps(payload))
             logging.info("Result: %s", r.text)
 
-            payload = {'ORDER': str(order_id)}
+            payload = {'ORDER': [str(order_id)]}
             r = requests.post(cbk, data = json.dumps(payload))
             logging.info("Result: %s", r.text)
 
