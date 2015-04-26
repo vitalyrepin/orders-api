@@ -54,9 +54,9 @@
  use Metida\ProfileParam;
 
  try {
-//  $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
+  $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
 
-  $socket = new TSocket('localhost', 30303);
+//  $socket = new TSocket('localhost', 30303);
   $timeout = 10; // in seconds.
   $socket->setRecvTimeout($timeout*1000);
   $socket->setSendTimeout($timeout*1000);

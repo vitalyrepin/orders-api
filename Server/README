@@ -16,7 +16,7 @@ stunnel log: /var/log/stunnel
 
 App log: ordermngmnt-<port>.log  (dirty, TBD: change to the proper syslog logging)
 
-dev.metidaprint.com:30301 <- developer sandbox
+dev.metidaprint.com:443 <- developer sandbox
 
 orders.metidaprint.com:443 <- production
 
