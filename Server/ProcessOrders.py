@@ -138,6 +138,11 @@ class PrintAndDeliveryHandler:
     self.orders = self.db.orders
     self.grid_fs = gridfs.GridFS(self.db, 'printfiles')
 
+  # Raises exception and logs it
+  def raiseException(self, user, em):
+    logging.info('[user "%s"] Throwing exception "%s"', user, str(em))
+    raise em
+
   def ping(self, authToken):
     self.getUserId(authToken)
     logging.info('ping()')
@@ -145,13 +150,12 @@ class PrintAndDeliveryHandler:
   def getUserId(self, authToken):
     # Searhing user id record by token
     # TBD: find_one: theoretically there can be more records because of the collisions with hash
-    user = self.users.find_one({'token.tok' : authToken}, {'_id' : 1, 'token' : 1})
+    user = self.users.find_one({'token.tok' : authToken}, {'_id' : 1, 'token' : 1, 'name' : 1})
     if user is None:
-      raise AccessDenied('Invalid authentication token')
+      self.raiseException(None, AccessDenied('Invalid authentication token'))
 
     if not(self.checkIsAuthTokValid(user['token']['tm'])):
-      logging.info("Auth token %s is expired", authToken)
-      raise AuthTokenExpired('Authentication token is expired. Request a new one using getAuthToken')
+      self.raiseException(user['_id'], AuthTokenExpired('Authentication token for user "' + user['name'] + '" is expired. Request a new one using getAuthToken'))
 
     return user['_id']
 
@@ -159,9 +163,9 @@ class PrintAndDeliveryHandler:
   # Auth token can never take these values in normal calls (if it is returned by getAuthToken method)
   def checkForUnitTest(self, tok):
     if(tok == 'wrongAuthToken'):
-        raise AccessDenied('Access denied or invalid auth token')
+        self.raiseException(None, AccessDenied('[Unit test] Access denied or invalid auth token'))
     if(tok == 'wrongSomething'):
-        raise GeneralError('-1', 'Something went wrong. Mongo is down? Try again later...')
+        self.raiseException(None, GeneralError('-1', '[Unit test] Something went wrong. Mongo is down? Try again later...'))
 
   def checkIsAuthTokValid(self, toktm):
      tm =time.time()
@@ -175,15 +179,15 @@ class PrintAndDeliveryHandler:
     return token['tok']
 
   def getAuthToken(self, username, pswd):
-    logging.info('username: "%s"', username)
+    logging.info('Getting authToken for user "%s"', username)
 
     tokAuth = ''
     try:
       user = self.users.find_one({'name' : username})
       if user is None:
-        raise AccessDenied('Invalid username or password')
+        self.raiseException(None, AccessDenied('Invalid username "' + username + '" or password'))
       if bcrypt.hashpw(pswd.encode('utf-8'), user['pswd'].encode('utf-8')) != user['pswd'].encode('utf-8'):
-        raise AccessDenied('Invalid username or password')
+        self.raiseException(username, AccessDenied('Invalid username "' + username + '" or password'))
       else:
         # If token exists in the users collection, return it. Otherwise generate, write to the database and return
         if 'token' in user:
@@ -196,7 +200,7 @@ class PrintAndDeliveryHandler:
            logging.info("Generating Auth token for the user '%s'", username)
            tokAuth = self.mkNewAuthToken(user['_id'])
     except PyMongoError as err:
-        raise GeneralError('-1', 'Something wrong: ' + str(err))
+        self.raiseException(username, GeneralError('-1', 'Something wrong: ' + str(err)))
 
     logging.info('user "%s" is successfully authorized', username)
     return tokAuth
@@ -243,13 +247,14 @@ class PrintAndDeliveryHandler:
     self.checkForUnitTest(authToken)
 
     try:
-      order = self.orders.find_one({ '_id': ObjectId(orderId), 'issuer': self.getUserId(authToken) }, { 'status' : 1, '_id' : 0 })
+      issuer = self.getUserId(authToken)
+      order = self.orders.find_one({ '_id': ObjectId(orderId), 'issuer' : issuer }, { 'status' : 1, '_id' : 0 })
       if order is None:
-        raise OrderError(OrderErrCode.INVALID_ID, 'No such order: ' + orderId)
+        self.raiseException(issuer, OrderError(OrderErrCode.INVALID_ID, 'No such order: ' + orderId))
     except bson.errors.InvalidId as err:
-        raise OrderError(OrderErrCode.INVALID_ID, 'Invalid order id format: ' + orderId)
+        self.raiseException(issuer, OrderError(OrderErrCode.INVALID_ID, 'Invalid order id format: ' + orderId))
     except PyMongoError as err:
-        raise GeneralError('-1', 'Something wrong: ' + str(err))
+        self.raiseException(issuer, GeneralError('-1', 'Something wrong: ' + str(err)))
 
     res = []
     for i in order['status']:
@@ -261,7 +266,7 @@ class PrintAndDeliveryHandler:
     self.checkForUnitTest(authToken)
 
     if(authToken == 'wrongAddress'):
-        raise OrderError(OrderErrCode.INVALID_ADDRESS, 'We do not deliver mail to Afganistan, sorry')
+        self.raiseException(None, OrderError(OrderErrCode.INVALID_ADDRESS, '[Unit test] We do not deliver mail to "' + str(shipment) + '", sorry'))
 
     issuer = self.getUserId(authToken)
 
@@ -273,13 +278,13 @@ class PrintAndDeliveryHandler:
         if product.url:
             r = requests.get(product.url, stream=True)
             if(r.status_code != 200):
-                raise OrderError(OrderErrCode.INVALID_PRINT_URL, 'HTTP status ' + str(r.status_code) + ': can not download file from URL: ' + products[0].url)
+                self.raiseException(issuer, OrderError(OrderErrCode.INVALID_PRINT_URL, 'HTTP status ' + str(r.status_code) + ': can not download file from URL: ' + products[0].url))
             mime_type = mimetypes.guess_type(product.url)[0]
             fname = urlparse(product.url).path
             try:
               fetched_products.append(FetchedProduct(product, self.grid_fs.put(r.raw, contentType=mime_type, filename=fname)))
             except PyMongoError as err:
-              raise GeneralError('-1', 'Something wrong: ' + str(err))
+              self.raiseException(issuer, GeneralError('-1', 'Something wrong: ' + str(err)))
         else:
             fetched_products.append(FetchedProduct(product, None))
 
@@ -296,7 +301,7 @@ class PrintAndDeliveryHandler:
     try:
       self.orders.insert(order)
     except PyMongoError as err:
-      raise GeneralError('-1', 'Something wrong: ' + str(err))
+      self.raiseException(issuer, GeneralError('-1', 'Something wrong: ' + str(err)))
 
     return str(order['_id'])
 
