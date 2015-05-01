@@ -130,6 +130,9 @@ try:
   except OrderError as err:
     print '[OK] Error: ' + str(err.code) + ' ' + err._message
 
+  # Restoring destination country to the supported value
+  shipment.address.cc = 'FI'
+
   # Testing error case: General error
   try:
     ordId = client.newOrder('wrongSomething', shipment, [product], misc)

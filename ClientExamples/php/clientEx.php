@@ -171,10 +171,13 @@
   try {
     // Syria is not supported destination. We shall receive an exception
     $shipment->address->cc = "SY";
-   $ordId = $client->newOrder($authToken, $shipment, array($product), $misc);
+    $ordId = $client->newOrder($authToken, $shipment, array($product), $misc);
   } catch (OrderError $err) {
     printf("[OK] Error: %d %s \n", $err->code, $err->_message);
   }
+
+  // Restoring destination country to the supported value
+  $shipment->address->cc = "FI";
 
   // Testing error case: General error
   try {
