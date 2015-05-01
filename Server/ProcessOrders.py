@@ -138,6 +138,8 @@ class PrintAndDeliveryHandler:
     self.db.add_son_manipulator(Transform())
     self.users = self.db.users
     self.orders = self.db.orders
+    # Metadata of the files stored in GridFS
+    self.files = self.db.printfiles.files
     self.grid_fs = gridfs.GridFS(self.db, 'printfiles')
 
   # Raises exception and logs it
@@ -277,21 +279,27 @@ class PrintAndDeliveryHandler:
         country = pycountry.countries.get(alpha2=shipment.address.cc).name
         self.raiseException(issuer, OrderError(OrderErrCode.INVALID_ADDRESS, 'We do not deliver mail to "' + country + '", sorry'))
 
-    # fetching URL
+    # fetching URLs if they were not fetched previously
     fetched_products = []
     for product in products:
+        file_id = None
         if product.url:
-            r = requests.get(product.url, stream=True)
-            if(r.status_code != 200):
-                self.raiseException(issuer, OrderError(OrderErrCode.INVALID_PRINT_URL, 'HTTP status ' + str(r.status_code) + ': can not download file from URL: ' + products[0].url))
-            mime_type = mimetypes.guess_type(product.url)[0]
-            fname = urlparse(product.url).path
-            try:
-              fetched_products.append(FetchedProduct(product, self.grid_fs.put(r.raw, contentType=mime_type, filename=fname)))
-            except PyMongoError as err:
-              self.raiseException(issuer, GeneralError('-1', 'Something wrong: ' + str(err)))
-        else:
-            fetched_products.append(FetchedProduct(product, None))
+            # Have we downloaded the file with the same MD5 previously?
+            file_id = self.files.find_one({'md5' : product.md5})
+            if(file_id is None):
+                r = requests.get(product.url, stream=True)
+                if(r.status_code != 200):
+                    self.raiseException(issuer, OrderError(OrderErrCode.INVALID_PRINT_URL, 'HTTP status ' + str(r.status_code) + ': can not download file from URL: ' + product.url))
+                mime_type = mimetypes.guess_type(product.url)[0]
+                fname = urlparse(product.url).path
+                try:
+                  file_id = self.grid_fs.put(r.raw, contentType=mime_type, filename=fname)
+                except PyMongoError as err:
+                  self.raiseException(issuer, GeneralError('-1', '[Can''t put file to gridfs] Something wrong: ' + str(err)))
+            else:
+                logging.info("URL '%s' is not fetched because we already have the file with the same MD5 in our storage", product.url)
+
+        fetched_products.append(FetchedProduct(product, file_id))
 
     pr = OrderTimePair(int(time.time()), OrderStatus.RECEIVED)
 
@@ -301,12 +309,15 @@ class PrintAndDeliveryHandler:
               "issuer"   : issuer,
               "status"   : [ pr ]
              }
+
     logging.info(order)
 
     try:
       self.orders.insert(order)
     except PyMongoError as err:
-      self.raiseException(issuer, GeneralError('-1', 'Something wrong: ' + str(err)))
+      self.raiseException(issuer, GeneralError('-1', '[CAN NOT INSERT ORDER] Something wrong: ' + str(err)))
+
+    logging.info("Order %s was created for the user %s", str(order['_id']), issuer)
 
     return str(order['_id'])
 
