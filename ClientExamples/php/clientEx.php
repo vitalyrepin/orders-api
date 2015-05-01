@@ -54,9 +54,9 @@
  use Metida\ProfileParam;
 
  try {
-  $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
+//  $socket = new TSSLSocket('dev.metidaprint.com', 443, FALSE, null, array('certfile' => 'cacert.pem'));
 
-//  $socket = new TSocket('localhost', 30303);
+  $socket = new TSocket('localhost', 30303);
   $timeout = 10; // in seconds.
   $socket->setRecvTimeout($timeout*1000);
   $socket->setSendTimeout($timeout*1000);
@@ -169,7 +169,9 @@
 
   // Testing error case: Not supported delivery address
   try {
-   $ordId = $client->newOrder('wrongAddress', $shipment, array($product), $misc);
+    // Syria is not supported destination. We shall receive an exception
+    $shipment->address->cc = "SY";
+   $ordId = $client->newOrder($authToken, $shipment, array($product), $misc);
   } catch (OrderError $err) {
     printf("[OK] Error: %d %s \n", $err->code, $err->_message);
   }

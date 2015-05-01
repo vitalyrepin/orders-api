@@ -124,7 +124,9 @@ try:
 
   # Testing error case: Not supported delivery address
   try:
-    ordId = client.newOrder('wrongAddress', shipment, [product], misc)
+    # Syria is not supported destination. We shall receive an exception
+    shipment.address.cc = 'SY'
+    ordId = client.newOrder(authToken, shipment, [product], misc)
   except OrderError as err:
     print '[OK] Error: ' + str(err.code) + ' ' + err._message
 

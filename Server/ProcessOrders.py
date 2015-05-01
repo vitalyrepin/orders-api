@@ -32,6 +32,8 @@ import requests
 import mimetypes
 import socket
 
+import pycountry
+
 import logging
 import logging.handlers
 
@@ -265,12 +267,15 @@ class PrintAndDeliveryHandler:
   def newOrder(self, authToken, shipment, products, misc):
     self.checkForUnitTest(authToken)
 
-    if(authToken == 'wrongAddress'):
-        self.raiseException(None, OrderError(OrderErrCode.INVALID_ADDRESS, '[Unit test] We do not deliver mail to "' + str(shipment) + '", sorry'))
-
     issuer = self.getUserId(authToken)
 
-    # TBD: Checking address - can we deliver to it?
+    # List of countries where we do not deliver is hard-coded for now: Syria and Lybia
+    # TBD: move to the database. But in an efficient way. Shall NOT be read with every new order
+    # Finnish post, unsupported countries are at the top of the page: http://posti.fi/privatkunder/priserochinstruktioner/landspecifikauppgifter/
+    unsupported_dests = ['SY', 'LY']
+    if(shipment.address.cc in unsupported_dests):
+        country = pycountry.countries.get(alpha2=shipment.address.cc).name
+        self.raiseException(issuer, OrderError(OrderErrCode.INVALID_ADDRESS, 'We do not deliver mail to "' + country + '", sorry'))
 
     # fetching URL
     fetched_products = []
